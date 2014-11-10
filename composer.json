@@ -7,9 +7,14 @@
     "license": "GPL-2.0+",
     "require": {
         "php": ">=5.3.10",
-         "joomla/string": "~1.0"
+         "joomla/string": "~1.0",
+         "joomla/filesystem": "~2.0"
+    },
+    "suggest": {
+        "symfony/yaml": "Install 2.* if you require YAML support."
     },
     "require-dev": {
+        "symfony/yaml": "~2.0",
         "phpunit/phpunit": "4.*",
         "squizlabs/php_codesniffer": "1.*"
     },
