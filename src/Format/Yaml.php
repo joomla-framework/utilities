@@ -8,7 +8,7 @@
 
 namespace Joomla\Utilities\Format;
 
-use Joomla\Utilities\AbstractUtilitiesFormat;
+use Joomla\Utilities\AbstractLoaderFormat;
 use Symfony\Component\Yaml\Parser as SymfonyYamlParser;
 use Symfony\Component\Yaml\Dumper as SymfonyYamlDumper;
 
@@ -17,7 +17,7 @@ use Symfony\Component\Yaml\Dumper as SymfonyYamlDumper;
  *
  * @since  2.0
  */
-class Yaml extends AbstractUtilitiesFormat
+class Yaml extends AbstractLoaderFormat
 {
 	/**
 	 * The YAML parser class.

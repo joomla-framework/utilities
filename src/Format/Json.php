@@ -8,7 +8,7 @@
 
 namespace Joomla\Utilities\Format;
 
-use Joomla\Utilities\AbstractUtilitiesFormat;
+use Joomla\Utilities\AbstractLoaderFormat;
 use Joomla\String\String;
 
 /**
@@ -16,7 +16,7 @@ use Joomla\String\String;
  *
  * @since  2.0
  */
-class Json extends AbstractUtilitiesFormat
+class Json extends AbstractLoaderFormat
 {
 	/**
 	 * Converts an object into a JSON formatted string.

@@ -8,7 +8,6 @@
 
 namespace Joomla\Utilities;
 
-use SplPriorityQueue as Queue;
 use Joomla\Filesystem\Path;
 
 /**
@@ -18,12 +17,15 @@ use Joomla\Filesystem\Path;
  */
 class Loader
 {
+	const ASC = 1;
+	const DESC = 0;
+
 	/**
 	 * Queue of paths to load
 	 *
 	 * @var  SplPriorityQueue
 	 */
-    protected $paths = null;
+    protected $paths = array();
 
     /** Internal cache
      *
@@ -45,8 +47,6 @@ class Loader
      */
     public function __construct($paths = array())
     {
-    	$this->paths = new Queue;
-
         if ($paths) {
             $this->setPaths($paths);
         }
@@ -70,35 +70,42 @@ class Loader
      */
     public function getPaths()
     {
-        return $this->paths->toArray();
+        return $this->paths;
     }
 
     /**
      * Sets the paths where templates are stored.
      *
-     * @param  string|array $paths     A path or an array of paths where to look for templates
-     * @param  string       $namespace A path namespace
+     * @param  string|array  $paths     A path or an array of paths where to look for templates
+     * @param  boolean       $order     In which order paths: 1 - ascending, 0 - descending 
      */
-    public function setPaths($paths)
+    public function setPaths($paths, $order = Loader::DESC)
     {
-    	$this->cache = array();
+    	//Clear paths
+		$this->paths = array();
 
         if (!is_array($paths))
         {
-            $paths = array($paths);
+            $this->pushPath($paths);
+			return;
         }
 
-        $this->paths->loadArray($paths);
+		$method = ($order === static::DESC) ? 'pushPath' : 'unshiftPath';
+
+		foreach ($paths as $path)
+		{
+			call_user_func(array($this, $method), $path);
+		}
     }
 
     /**
-     * Adds a path where templates are stored.
+     * Adds a path to the end of queue.
      *
      * @param  string $path      A path where to look for templates
      *
      * @throws \UnexpectedValueException
      */
-    public function addPath($path, $namespace = self::MAIN_NAMESPACE)
+    public function pushPath($path)
     {
     	$this->cache = array();
 
@@ -107,17 +114,17 @@ class Loader
             throw new \UnexpectedValueException(sprintf('The "%s" directory does not exist.', $path));
         }
 
-        $this->paths->insert(Path::clean($path), Queue::FIRST);
+		array_push($this->paths, Path::clean($path));
     }
 
     /**
-     * Prepends a path where templates are stored.
+     * Adds a path to the beginning of queue
      *
      * @param string $path      A path where to look for templates
      *
      * @throws \UnexpectedValueException
      */
-    public function prependPath($path)
+    public function unshiftPath($path)
     {
     	$this->cache = array();
 
@@ -126,7 +133,7 @@ class Loader
             throw new \UnexpectedValueException(sprintf('The "%s" directory does not exist.', $path));
         }
 
-        $this->paths->insert(Path::clean($path), Queue::LAST);
+		array_unshift($this->paths, Path::clean($path));
     }
 
     public function getSource($name)
@@ -238,7 +245,7 @@ class Loader
         	throw new \RuntimeException(sprintf('Unable to find file "%s" (looked into: %s).', $name, implode(', ', $this->paths)));
 		}
 
-		return $filename;
+		return $this->cache[$name] = $filename;
     }
 
 	protected function loadSource($file)

@@ -8,7 +8,7 @@
 
 namespace Joomla\Utilities\Format;
 
-use Joomla\Utilities\AbstractUtilitiesFormat;
+use Joomla\Utilities\AbstractLoaderFormat;
 use SimpleXMLElement;
 use stdClass;
 
@@ -17,7 +17,7 @@ use stdClass;
  *
  * @since  2.0
  */
-class Xml extends AbstractUtilitiesFormat
+class Xml extends AbstractLoaderFormat
 {
 	/**
 	 * Converts an object into an XML formatted string.

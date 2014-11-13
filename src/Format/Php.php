@@ -8,14 +8,14 @@
 
 namespace Joomla\Utilities\Format;
 
-use Joomla\Utilities\AbstractUtilitiesFormat;
+use Joomla\Utilities\AbstractLoaderFormat;
 
 /**
  * PHP class format handler for Utilities
  *
  * @since  2.0
  */
-class Php extends AbstractUtilitiesFormat
+class Php extends AbstractLoaderFormat
 {
 	/**
 	 * Converts an object into a php class string.
