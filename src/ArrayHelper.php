@@ -393,7 +393,7 @@ final class ArrayHelper
 	 *
 	 * @since   1.0
 	 */
-	public static function pivot(array $source, $key = null)
+	public static function pivot(array $source, $key)
 	{
 		$result  = array();
 		$counter = array();
