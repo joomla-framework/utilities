@@ -4,6 +4,9 @@
  * @license    GNU General Public License version 2 or later; see LICENSE
  */
 
+namespace Joomla\Utilities\Tests;
+
+use ArrayObject;
 use Joomla\Utilities\ArrayHelper;
 use PHPUnit\Framework\TestCase;
 
