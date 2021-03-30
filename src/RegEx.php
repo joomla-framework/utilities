@@ -16,7 +16,7 @@ namespace Joomla\Utilities;
 abstract class RegEx
 {
 	/**
-	 * Math the Regular Expression
+	 * Match the Regular Expression
 	 *
 	 * @param   string  $regex    The Regular Expression
 	 * @param   string  $subject  The string to check
@@ -31,9 +31,10 @@ abstract class RegEx
 
 		return array_filter(
 			$match,
-			function ($value, $key) {
+			static function ($value, $key) {
 				return !is_numeric($key) && !empty($value);
-			}, ARRAY_FILTER_USE_BOTH
+			},
+			ARRAY_FILTER_USE_BOTH
 		);
 	}
 
