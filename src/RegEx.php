@@ -29,8 +29,8 @@ abstract class RegEx
 
 		preg_match($regex, $subject, $match);
 
-		// @todo Remove this block, once minimum PHP version is raised above the limit
-		if (version_compare(PHP_VERSION, '5.6.0', '<'))
+		// @todo Remove this block, once minimum PHP version is raised above PHP 5.6.0
+		if (PHP_VERSION_ID < 50600)
 		{
 			$result = array();
 
@@ -45,7 +45,7 @@ abstract class RegEx
 			return $result;
 		}
 
-		return array_filter($match, static function ($value, $key) {
+		return array_filter($match, function ($value, $key) {
 			return !is_numeric($key) && !empty($value);
 		}, ARRAY_FILTER_USE_BOTH);
 	}
