@@ -2279,7 +2279,7 @@ class ArrayHelperTest extends TestCase
 	/**
 	 * @testdox  Verify that getValue() throws an \InvalidArgumentException when an object is given that doesn't implement \ArrayAccess
 	 *
-	 * @ expectedException  \InvalidArgumentException
+	 * @expectedException  \InvalidArgumentException
 	 * @since              1.3.1
 	 */
 	public function testInvalidArgumentExceptionWithAnObjectNotImplementingArrayAccess()
@@ -2290,7 +2290,12 @@ class ArrayHelperTest extends TestCase
 		$object->age = 20;
 		$object->address = null;
 
-		$this->expectException('\\InvalidArgumentException');
+		if (method_exists($this, 'expectException'))
+		{
+			/** @noinspection PhpLanguageLevelInspection */
+			$this->expectException(\InvalidArgumentException::class);
+		}
+
 		/** @noinspection PhpParamsInspection */
 		ArrayHelper::getValue($object, 'string');
 	}
