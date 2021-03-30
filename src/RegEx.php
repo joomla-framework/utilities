@@ -15,19 +15,23 @@ namespace Joomla\Utilities;
  */
 abstract class RegEx
 {
+	/**
+	 * Math the Regular Expression
+	 *
+	 * @param   string  $regex    The Regular Expression
+	 * @param   string  $subject  The string to check
+	 *
+	 * @return  array  Captured values
+	 */
 	public static function match($regex, $subject)
 	{
 		$match = array();
 
 		preg_match($regex, $subject, $match);
 
-		return array_filter(
-			$match,
-			static function ($value, $key) {
+		return array_filter($match, static function ($value, $key) {
 				return !is_numeric($key) && !empty($value);
-			},
-			ARRAY_FILTER_USE_BOTH
-		);
+		}, ARRAY_FILTER_USE_BOTH);
 	}
 
 	/**
