@@ -45,9 +45,11 @@ abstract class RegEx
 			return $result;
 		}
 
-		return array_filter($match, function ($value, $key) {
-			return !is_numeric($key) && !empty($value);
-		}, ARRAY_FILTER_USE_BOTH
+		return array_filter(
+			$match,
+			function ($value, $key) {
+				return !is_numeric($key) && !empty($value);
+			}, ARRAY_FILTER_USE_BOTH
 		);
 	}
 
