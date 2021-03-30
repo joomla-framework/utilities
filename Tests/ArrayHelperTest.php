@@ -2290,12 +2290,6 @@ class ArrayHelperTest extends TestCase
 		$object->age = 20;
 		$object->address = null;
 
-		if (method_exists($this, 'expectException'))
-		{
-			/** @noinspection PhpLanguageLevelInspection */
-			$this->expectException(\InvalidArgumentException::class);
-		}
-
 		/** @noinspection PhpParamsInspection */
 		ArrayHelper::getValue($object, 'string');
 	}
