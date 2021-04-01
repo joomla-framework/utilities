@@ -59,7 +59,7 @@ class IpHelperTest extends TestCase
 		unset($_SERVER['HTTP_FORWARDED']);
 		unset($_SERVER['REMOTE_ADDR']);
 
-		IpHelper::setIp(null);
+		IpHelper::setIP(null);
 	}
 
 	/**
@@ -130,10 +130,10 @@ class IpHelperTest extends TestCase
 	{
 		$_SERVER[$index] = $ip;
 
-		IpHelper::setIp(null);
+		IpHelper::setIP(null);
 		IpHelper::setAllowIpOverrides(true);
 
-		$this->assertEquals($normalised, IpHelper::getIp());
+		$this->assertEquals($normalised, IpHelper::getIP());
 	}
 
 	/**
@@ -152,7 +152,7 @@ class IpHelperTest extends TestCase
 
 		IpHelper::setAllowIpOverrides(false);
 
-		$this->assertEquals('80.80.80.80', IpHelper::getIp());
+		$this->assertEquals('80.80.80.80', IpHelper::getIP());
 	}
 
 	/**
@@ -260,6 +260,6 @@ class IpHelperTest extends TestCase
 	 */
 	public function testIpInList($ip, $ipTable, $expected)
 	{
-		$this->assertEquals($expected, IpHelper::IPinList($ip, $ipTable));
+		$this->assertEquals($expected, IpHelper::isInRanges($ip, $ipTable));
 	}
 }

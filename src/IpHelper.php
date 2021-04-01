@@ -42,7 +42,7 @@ abstract class IpHelper
 	 *
 	 * @since   1.6.0
 	 */
-	public static function getIp($allowOverride = null)
+	public static function getIP($allowOverride = null)
 	{
 		// @todo Remove this block in 2.0 and change the parameter's default value from null to false
 		if ($allowOverride === null)
@@ -63,7 +63,7 @@ abstract class IpHelper
 	 * @since      1.6.0
 	 * @deprecated 2.0 If you want to cache the IP address, you should handle that yourself.
 	 */
-	public static function setIp($ip)
+	public static function setIP($ip)
 	{
 		self::$ip = $ip;
 	}
@@ -85,273 +85,120 @@ abstract class IpHelper
 	/**
 	 * Checks if an IP is contained in a list of IPs or IP expressions
 	 *
-	 * @param   string        $ip       The IPv4/IPv6 address to check
-	 * @param   array|string  $ipTable  An IP expression (or a comma-separated or array list of IP expressions) to check against
+	 * @param   string        $ip        The IPv4/IPv6 address to check
+	 * @param   array|string  $ipRanges  A comma-separated list or array of IP ranges to check against.
+	 *                                   Range may be specified as from-to, CIDR or IP with netmask.
 	 *
 	 * @return  boolean
 	 *
 	 * @since   1.6.0
 	 */
-	public static function IPinList($ip, $ipTable = '')
+	public static function isInRanges($ip, $ipRanges = '')
 	{
-		// No point proceeding with an empty IP list
-		if (empty($ipTable))
+		// Reject empty IPs or ANY_ADDRESS
+		if (empty($ip) || $ip === '0.0.0.0' || $ip === '::')
 		{
 			return false;
 		}
 
-		// If the IP list is not an array, convert it to an array
-		if (!\is_array($ipTable))
-		{
-			if (strpos($ipTable, ',') !== false)
-			{
-				$ipTable = explode(',', $ipTable);
-				$ipTable = array_map('trim', $ipTable);
-			}
-			else
-			{
-				$ipTable = trim($ipTable);
-				$ipTable = array($ipTable);
-			}
-		}
-
-		// If no IP address is found, return false
-		if ($ip === '0.0.0.0')
+		// IP can not be in an empty range
+		if (empty($ipRanges))
 		{
 			return false;
 		}
 
-		// If no IP is given, return false
-		if (empty($ip))
+		// If the IP list is provided as string, convert it to an array
+		if (!\is_array($ipRanges))
 		{
-			return false;
+			$ipRanges = preg_split('~,\s*~', $ipRanges);
 		}
 
-		// Get the IP's in_adds representation
-		$myIP = @inet_pton($ip);
+		$ipRanges = array_reduce(
+			$ipRanges,
+			function ($list, $range) {
+				$range = trim($range);
 
-		// If the IP is in an unrecognisable format, quite
-		if ($myIP === false)
+				if (!empty($range))
+				{
+					$list[] = $range;
+				}
+
+				return $list;
+			},
+			array()
+		);
+
+		foreach ($ipRanges as $ipRange)
 		{
-			return false;
-		}
-
-		$ipv6 = static::isIPv6($ip);
-
-		foreach ($ipTable as $ipExpression)
-		{
-			$ipExpression = trim($ipExpression);
-
-			// Inclusive IP range, i.e. 123.123.123.123-124.125.126.127
-			if (strpos($ipExpression, '-') !== false)
+			if (self::isInRange($ip, $ipRange))
 			{
-				list($from, $to) = explode('-', $ipExpression, 2);
-
-				if ($ipv6 && (!static::isIPv6($from) || !static::isIPv6($to)))
-				{
-					// Do not apply IPv4 filtering on an IPv6 address
-					continue;
-				}
-
-				if (!$ipv6 && (static::isIPv6($from) || static::isIPv6($to)))
-				{
-					// Do not apply IPv6 filtering on an IPv4 address
-					continue;
-				}
-
-				$from = @inet_pton(trim($from));
-				$to   = @inet_pton(trim($to));
-
-				// Sanity check
-				if (($from === false) || ($to === false))
-				{
-					continue;
-				}
-
-				// Swap from/to if they're in the wrong order
-				if ($from > $to)
-				{
-					list($from, $to) = array($to, $from);
-				}
-
-				if (($myIP >= $from) && ($myIP <= $to))
-				{
-					return true;
-				}
-			}
-			// Netmask or CIDR provided
-			elseif (strpos($ipExpression, '/') !== false)
-			{
-				$binaryip = static::inetToBits($myIP);
-
-				list($net, $maskbits) = explode('/', $ipExpression, 2);
-
-				if ($ipv6 && !static::isIPv6($net))
-				{
-					// Do not apply IPv4 filtering on an IPv6 address
-					continue;
-				}
-
-				if (!$ipv6 && static::isIPv6($net))
-				{
-					// Do not apply IPv6 filtering on an IPv4 address
-					continue;
-				}
-
-				if ($ipv6 && strpos($maskbits, ':') !== false)
-				{
-					// Perform an IPv6 CIDR check
-					if (static::checkIPv6CIDR($myIP, $ipExpression))
-					{
-						return true;
-					}
-
-					// If we didn't match it proceed to the next expression
-					continue;
-				}
-
-				if (!$ipv6 && strpos($maskbits, '.') !== false)
-				{
-					// Convert IPv4 netmask to CIDR
-					$long     = ip2long($maskbits);
-					$base     = ip2long('255.255.255.255');
-					$maskbits = 32 - log(($long ^ $base) + 1, 2);
-				}
-
-				// Convert network IP to in_addr representation
-				$net = @inet_pton($net);
-
-				// Sanity check
-				if ($net === false)
-				{
-					continue;
-				}
-
-				// Get the network's binary representation
-				$expectedNumberOfBits = $ipv6 ? 128 : 24;
-				$binarynet            = str_pad(static::inetToBits($net), $expectedNumberOfBits, '0', STR_PAD_RIGHT);
-
-				// Check the corresponding bits of the IP and the network
-				$ipNetBits = substr($binaryip, 0, $maskbits);
-				$netBits   = substr($binarynet, 0, $maskbits);
-
-				if ($ipNetBits === $netBits)
-				{
-					return true;
-				}
-			}
-			elseif ($ipv6)
-			{
-				// IPv6: Only single IPs are supported
-				$ipExpression = trim($ipExpression);
-
-				if (!static::isIPv6($ipExpression))
-				{
-					continue;
-				}
-
-				$ipCheck = @inet_pton($ipExpression);
-
-				if ($ipCheck === false)
-				{
-					continue;
-				}
-
-				if ($ipCheck === $myIP)
-				{
-					return true;
-				}
-			}
-			else
-			{
-				// Standard IPv4 address, i.e. 123.123.123.123 or partial IP address, i.e. 123.[123.][123.][123]
-				$dots = 0;
-
-				if (substr($ipExpression, -1) === '.')
-				{
-					// Partial IP address. Convert to CIDR and re-match
-					foreach (count_chars($ipExpression, 1) as $i => $val)
-					{
-						if ($i === 46)
-						{
-							$dots = $val;
-						}
-					}
-
-					switch ($dots)
-					{
-						case 1:
-							$netmask      = '255.0.0.0';
-							$ipExpression .= '0.0.0';
-
-							break;
-
-						case 2:
-							$netmask      = '255.255.0.0';
-							$ipExpression .= '0.0';
-
-							break;
-
-						case 3:
-							$netmask      = '255.255.255.0';
-							$ipExpression .= '0';
-
-							break;
-
-						default:
-							$dots = 0;
-					}
-
-					if ($dots)
-					{
-						$binaryip = static::inetToBits($myIP);
-
-						// Convert netmask to CIDR
-						$long     = ip2long($netmask);
-						$base     = ip2long('255.255.255.255');
-						$maskbits = 32 - log(($long ^ $base) + 1, 2);
-
-						$net = @inet_pton($ipExpression);
-
-						// Sanity check
-						if ($net === false)
-						{
-							continue;
-						}
-
-						// Get the network's binary representation
-						$expectedNumberOfBits = $ipv6 ? 128 : 24;
-						$binarynet            = str_pad(
-							static::inetToBits($net),
-							$expectedNumberOfBits,
-							'0',
-							STR_PAD_RIGHT
-						);
-
-						// Check the corresponding bits of the IP and the network
-						$ipNetBits = substr($binaryip, 0, $maskbits);
-						$netBits   = substr($binarynet, 0, $maskbits);
-
-						if ($ipNetBits === $netBits)
-						{
-							return true;
-						}
-					}
-				}
-
-				if (!$dots)
-				{
-					$ip = @inet_pton(trim($ipExpression));
-
-					if ($ip === $myIP)
-					{
-						return true;
-					}
-				}
+				return true;
 			}
 		}
 
 		return false;
+	}
+
+	private static function isInRange($ip, $ipRange)
+	{
+		// Inclusive IP range, i.e. 123.123.123.123-124.125.126.127
+		if (strpos($ipRange, '-') !== false)
+		{
+			list($from, $to) = preg_split('~\s*-\s*~', $ipRange, 2);
+
+			return self::isInExplicitRange($ip, $from, $to);
+		}
+
+		// Netmask or CIDR provided
+		if (strpos($ipRange, '/') !== false)
+		{
+			list($net, $mask) = explode('/', $ipRange, 2);
+
+			// CIDR
+			if (is_numeric($mask))
+			{
+				return self::isInCidrRange($ip, $net, $mask);
+			}
+
+			// Netmask
+			return self::isInNetmaskRange($ip, $net, $mask);
+		}
+
+		// Partial IP address, i.e. 123.[123.[123.]]
+		if (!self::isIPv6($ip) && preg_match('~\.$~', $ipRange))
+		{
+			$segments = explode('.', $ipRange);
+
+			// Drop empty segment
+			array_pop($segments);
+
+			if (count($segments) > 3)
+			{
+				return false;
+			}
+
+			$mask = count($segments) * 8;
+
+			while (count($segments) < 4)
+			{
+				$segments[] = 0;
+			}
+
+			$prefix = implode('.', $segments);
+
+			return self::isInCidrRange($ip, $prefix, $mask);
+		}
+
+		// Range is a single IP
+		$binaryIp    = self::toBits($ip);
+		$binaryRange = self::toBits($ipRange);
+
+		if (empty($binaryIp) || empty($binaryRange))
+		{
+			return false;
+		}
+
+		return $binaryIp === $binaryRange;
 	}
 
 	/**
@@ -360,11 +207,12 @@ abstract class IpHelper
 	 * @return  void
 	 *
 	 * @since      1.6.0
+	 * @codeCoverageIgnore
 	 * @deprecated 2.0 No replacement, this is never used
 	 */
 	public static function workaroundIPIssues()
 	{
-		$ip = static::getIp();
+		$ip = static::getIP();
 
 		if (isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR'] === $ip)
 		{
@@ -395,7 +243,7 @@ abstract class IpHelper
 	 */
 	public static function setAllowIpOverrides($newState)
 	{
-		self::$allowIpOverrides = (bool)$newState;
+		self::$allowIpOverrides = (bool) $newState;
 	}
 
 	/**
@@ -414,9 +262,9 @@ abstract class IpHelper
 	 *
 	 * @since   1.6.0
 	 */
-	protected static function detectAndCleanIP($allowOverride)
+	private static function detectAndCleanIP($allowOverride)
 	{
-		$rawIp = static::detectIP($allowOverride);
+		$rawIp  = static::detectIP($allowOverride);
 		$ipList = preg_split('~,\s*~', $rawIp);
 
 		$ipList = array_reduce(
@@ -434,7 +282,7 @@ abstract class IpHelper
 			array()
 		);
 
-		return (string) array_pop($ipList);
+		return (string)array_pop($ipList);
 	}
 
 	/**
@@ -447,7 +295,7 @@ abstract class IpHelper
 	 *
 	 * @since   1.6.0
 	 */
-	protected static function detectIP($allowOverride)
+	private static function detectIP($allowOverride)
 	{
 		// Order matters!
 		$indexes = array(
@@ -476,56 +324,127 @@ abstract class IpHelper
 	/**
 	 * Converts inet_pton output to bits string
 	 *
-	 * @param   string  $inet  The in_addr representation of an IPv4 or IPv6 address
+	 * @param   string  $ip  The IPv4 or IPv6 address
 	 *
 	 * @return  string
 	 *
 	 * @since   1.6.0
 	 */
-	protected static function inetToBits($inet)
+	private static function toBits($ip)
 	{
-		if (\strlen($inet) === 4)
+		$packedIp = inet_pton($ip);
+
+		if ($packedIp === false)
 		{
-			$unpacked = unpack('A4', $inet);
-		}
-		else
-		{
-			$unpacked = unpack('A16', $inet);
+			return '';
 		}
 
+		$length   = self::isIPv6($ip) ? 16 : 4;
+		$unpacked = unpack('A' . $length, $packedIp);
 		$unpacked = str_split($unpacked[1]);
-		$binaryip = '';
+		$binaryIp = '';
 
 		foreach ($unpacked as $char)
 		{
-			$binaryip .= str_pad(decbin(\ord($char)), 8, '0', STR_PAD_LEFT);
+			$binaryIp .= str_pad(decbin(\ord($char)), 8, '0', STR_PAD_LEFT);
 		}
 
-		return $binaryip;
+		$binaryIp = str_pad($binaryIp, $length * 8, '0', STR_PAD_RIGHT);
+
+		return $binaryIp;
 	}
 
 	/**
-	 * Checks if an IPv6 address $ip is part of the IPv6 CIDR block $cidrnet
+	 * Check if two IP addresses have the same IP format
 	 *
-	 * @param   string  $ip       The IPv6 address to check, e.g. 21DA:00D3:0000:2F3B:02AC:00FF:FE28:9C5A
-	 * @param   string  $cidrnet  The IPv6 CIDR block, e.g. 21DA:00D3:0000:2F3B::/64
+	 * @param   string  $ip1  The first IP address
+	 * @param   string  $ip2  The second IP address
+	 *
+	 * @return boolean
+	 */
+	private static function ipVersionMatch($ip1, $ip2)
+	{
+		return self::isIPv6($ip1) === self::isIPv6($ip2);
+	}
+
+	/**
+	 * @param   string  $ip    The IP address to check
+	 * @param   string  $from  Lower bound of the range
+	 * @param   string  $to    Upper bound of the range
 	 *
 	 * @return  boolean
-	 *
-	 * @since   1.6.0
 	 */
-	protected static function checkIPv6CIDR($ip, $cidrnet)
+	private static function isInExplicitRange($ip, $from, $to)
 	{
-		$ip       = inet_pton($ip);
-		$binaryip = static::inetToBits($ip);
+		if (!self::ipVersionMatch($ip, $from) || !self::ipVersionMatch($ip, $to))
+		{
+			return false;
+		}
 
-		list($net, $maskbits) = explode('/', $cidrnet);
-		$net       = inet_pton($net);
-		$binarynet = static::inetToBits($net);
+		$binaryFrom = self::toBits($from);
+		$binaryTo   = self::toBits($to);
+		$binaryIp   = self::toBits($ip);
 
-		$ipNetBits = substr($binaryip, 0, $maskbits);
-		$netBits   = substr($binarynet, 0, $maskbits);
+		if (empty($binaryFrom) || empty($binaryTo) || empty($binaryIp))
+		{
+			return false;
+		}
 
-		return $ipNetBits === $netBits;
+		// Swap from/to if they're in the wrong order
+		if ($binaryFrom > $binaryTo)
+		{
+			list($binaryFrom, $binaryTo) = array($binaryTo, $binaryFrom);
+		}
+
+		return $binaryFrom <= $binaryIp && $binaryIp <= $binaryTo;
+	}
+
+	/**
+	 * @param   string   $ip
+	 * @param   string   $prefix
+	 * @param   integer  $mask
+	 *
+	 * @return  boolean
+	 */
+	private static function isInCidrRange($ip, $prefix, $mask)
+	{
+		if (!self::ipVersionMatch($ip, $prefix))
+		{
+			return false;
+		}
+
+		$binaryIp     = static::toBits($ip);
+		$binaryPrefix = static::toBits($prefix);
+
+		if (empty($binaryIp) || empty($binaryPrefix))
+		{
+			return false;
+		}
+
+		$maskedIp     = substr($binaryIp, 0, $mask);
+		$maskedPrefix = substr($binaryPrefix, 0, $mask);
+
+		return $maskedIp === $maskedPrefix;
+	}
+
+	/**
+	 * @param   string  $ip
+	 * @param   string  $prefix
+	 * @param   string  $netmask
+	 *
+	 * @return boolean
+	 */
+	private static function isInNetmaskRange($ip, $prefix, $netmask)
+	{
+		$binaryMask = self::toBits($netmask);
+
+		if (empty($binaryMask))
+		{
+			return false;
+		}
+
+		$mask = strlen(str_replace('0', '', $binaryMask));
+
+		return self::isInCidrRange($ip, $prefix, $mask);
 	}
 }
