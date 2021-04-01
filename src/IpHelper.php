@@ -149,7 +149,7 @@ final class IpHelper
 		// Sanity check
 		if (!\function_exists('inet_pton'))
 		{
-			return false; // @codeCoverageIgnore
+			return false;
 		}
 
 		// Get the IP's in_adds representation
