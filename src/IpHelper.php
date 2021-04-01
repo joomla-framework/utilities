@@ -36,6 +36,8 @@ abstract class IpHelper
 	/**
 	 * Get the current visitor's IP address
 	 *
+	 * @param   boolean|null  $allowOverride  If true, HTTP headers are taken into account
+	 *
 	 * @return  string
 	 *
 	 * @since   1.6.0
@@ -49,7 +51,7 @@ abstract class IpHelper
 
 		$ip = static::detectAndCleanIP($allowOverride);
 
-		if (!empty($ip) && ($ip != '0.0.0.0') && \function_exists('inet_pton') && \function_exists('inet_ntop'))
+		if (!empty($ip) && $ip != '0.0.0.0')
 		{
 			$myIP = @inet_pton($ip);
 
@@ -132,12 +134,6 @@ abstract class IpHelper
 
 		// If no IP is given, return false
 		if (empty($ip))
-		{
-			return false;
-		}
-
-		// Sanity check
-		if (!\function_exists('inet_pton'))
 		{
 			return false;
 		}
