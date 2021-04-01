@@ -29,7 +29,7 @@ abstract class IpHelper
 	 *
 	 * @var    boolean
 	 * @since  1.6.0
-	 * @note   The default value is false in version 2.0+
+	 * @deprecated 2.0 Use the parameter of IpHelper::getIp() instead.
 	 */
 	private static $allowIpOverrides = true;
 
@@ -40,9 +40,14 @@ abstract class IpHelper
 	 *
 	 * @since   1.6.0
 	 */
-	public static function getIp()
+	public static function getIp($allowOverride = null)
 	{
-		$ip = static::detectAndCleanIP();
+		// Remove this block in 2.0 and change the parameter's default value from null to false
+		if ($allowOverride === null) {
+			$allowOverride = self::$allowIpOverrides;
+		}
+
+		$ip = static::detectAndCleanIP($allowOverride);
 
 		if (!empty($ip) && ($ip != '0.0.0.0') && \function_exists('inet_pton') && \function_exists('inet_ntop'))
 		{
@@ -402,10 +407,11 @@ abstract class IpHelper
 	 * @return  void
 	 *
 	 * @since   1.6.0
+	 * @deprecated 2.0 Use the parameter of IpHelper::getIp() instead.
 	 */
 	public static function setAllowIpOverrides($newState)
 	{
-		self::$allowIpOverrides = $newState ? true : false;
+		self::$allowIpOverrides = (bool) $newState;
 	}
 
 	/**
@@ -418,13 +424,15 @@ abstract class IpHelper
 	 *
 	 * The solution used is assuming that the last IP address is the external one.
 	 *
+	 * @param   boolean  $allowOverride
+	 *
 	 * @return  string
 	 *
 	 * @since   1.6.0
 	 */
-	protected static function detectAndCleanIP()
+	protected static function detectAndCleanIP($allowOverride)
 	{
-		$ip = static::detectIP();
+		$ip = static::detectIP($allowOverride);
 
 		if (strstr($ip, ',') !== false || strstr($ip, ' ') !== false)
 		{
@@ -450,23 +458,25 @@ abstract class IpHelper
 	/**
 	 * Gets the visitor's IP address
 	 *
+	 * @param   boolean  $allowOverride
+	 *
 	 * @return  string
 	 *
 	 * @since   1.6.0
 	 */
-	protected static function detectIP()
+	protected static function detectIP($allowOverride)
 	{
 		// Normally the $_SERVER superglobal is set
 		if (isset($_SERVER))
 		{
 			// Do we have an x-forwarded-for HTTP header (e.g. NginX)?
-			if (self::$allowIpOverrides && isset($_SERVER['HTTP_X_FORWARDED_FOR']))
+			if ($allowOverride && isset($_SERVER['HTTP_X_FORWARDED_FOR']))
 			{
 				return $_SERVER['HTTP_X_FORWARDED_FOR'];
 			}
 
 			// Do we have a client-ip header (e.g. non-transparent proxy)?
-			if (self::$allowIpOverrides && isset($_SERVER['HTTP_CLIENT_IP']))
+			if ($allowOverride && isset($_SERVER['HTTP_CLIENT_IP']))
 			{
 				return $_SERVER['HTTP_CLIENT_IP'];
 			}
@@ -488,13 +498,13 @@ abstract class IpHelper
 		}
 
 		// Do we have an x-forwarded-for HTTP header?
-		if (self::$allowIpOverrides && getenv('HTTP_X_FORWARDED_FOR'))
+		if ($allowOverride && getenv('HTTP_X_FORWARDED_FOR'))
 		{
 			return getenv('HTTP_X_FORWARDED_FOR');
 		}
 
 		// Do we have a client-ip header?
-		if (self::$allowIpOverrides && getenv('HTTP_CLIENT_IP'))
+		if ($allowOverride && getenv('HTTP_CLIENT_IP'))
 		{
 			return getenv('HTTP_CLIENT_IP');
 		}
