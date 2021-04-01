@@ -139,6 +139,14 @@ abstract class IpHelper
 		return false;
 	}
 
+	/**
+	 * Check if an IP is in a given range
+	 *
+	 * @param   string  $ip       The IP to check
+	 * @param   string  $ipRange  The IP range; may be specified as from-to, CIDR or IP with netmask.
+	 *
+	 * @return bool
+	 */
 	private static function isInRange($ip, $ipRange)
 	{
 		// Inclusive IP range, i.e. 123.123.123.123-124.125.126.127
@@ -243,7 +251,7 @@ abstract class IpHelper
 	 */
 	public static function setAllowIpOverrides($newState)
 	{
-		self::$allowIpOverrides = (bool) $newState;
+		self::$allowIpOverrides = (bool)$newState;
 	}
 
 	/**
@@ -255,7 +263,7 @@ abstract class IpHelper
 	 *
 	 * The solution used is assuming that the last IP address is the external one.
 	 *
-	 * @param   boolean  $allowOverride
+	 * @param   boolean  $allowOverride  If true, HTTP headers are taken into account
 	 *
 	 * @return  string   The validated IP address as provided.
 	 *                   If no IP is available, an empty string is returned.
@@ -282,13 +290,13 @@ abstract class IpHelper
 			array()
 		);
 
-		return (string)array_pop($ipList);
+		return (string) array_pop($ipList);
 	}
 
 	/**
 	 * Gets the visitor's IP address
 	 *
-	 * @param   boolean  $allowOverride
+	 * @param   boolean  $allowOverride  If true, HTTP headers are taken into account
 	 *
 	 * @return  string   The IP address(es) as provided without validation.
 	 *                   If no IP is available, an empty string is returned.
@@ -400,9 +408,9 @@ abstract class IpHelper
 	}
 
 	/**
-	 * @param   string   $ip
-	 * @param   string   $prefix
-	 * @param   integer  $mask
+	 * @param   string   $ip      The IP address to check
+	 * @param   string   $prefix  The prefix address
+	 * @param   integer  $mask    The length of the prefix
 	 *
 	 * @return  boolean
 	 */
@@ -428,9 +436,9 @@ abstract class IpHelper
 	}
 
 	/**
-	 * @param   string  $ip
-	 * @param   string  $prefix
-	 * @param   string  $netmask
+	 * @param   string  $ip       The IP address to check
+	 * @param   string  $prefix   The prefix address
+	 * @param   string  $netmask  The netmask
 	 *
 	 * @return boolean
 	 */
