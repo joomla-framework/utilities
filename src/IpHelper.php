@@ -51,7 +51,7 @@ abstract class IpHelper
 
 		$ip = static::detectAndCleanIP($allowOverride);
 
-		if (!empty($ip) && $ip != '0.0.0.0')
+		if (!empty($ip) && $ip !== '0.0.0.0')
 		{
 			$myIP = @inet_pton($ip);
 
@@ -154,7 +154,7 @@ abstract class IpHelper
 			$ipExpression = trim($ipExpression);
 
 			// Inclusive IP range, i.e. 123.123.123.123-124.125.126.127
-			if (strstr($ipExpression, '-'))
+			if (strpos($ipExpression, '-') !== false)
 			{
 				list($from, $to) = explode('-', $ipExpression, 2);
 
@@ -191,7 +191,7 @@ abstract class IpHelper
 				}
 			}
 			// Netmask or CIDR provided
-			elseif (strstr($ipExpression, '/'))
+			elseif (strpos($ipExpression, '/') !== false)
 			{
 				$binaryip = static::inetToBits($myIP);
 
@@ -209,7 +209,7 @@ abstract class IpHelper
 					continue;
 				}
 
-				if ($ipv6 && strstr($maskbits, ':'))
+				if ($ipv6 && strpos($maskbits, ':') !== false)
 				{
 					// Perform an IPv6 CIDR check
 					if (static::checkIPv6CIDR($myIP, $ipExpression))
@@ -221,7 +221,7 @@ abstract class IpHelper
 					continue;
 				}
 
-				if (!$ipv6 && strstr($maskbits, '.'))
+				if (!$ipv6 && strpos($maskbits, '.') !== false)
 				{
 					// Convert IPv4 netmask to CIDR
 					$long     = ip2long($maskbits);
@@ -270,7 +270,7 @@ abstract class IpHelper
 						continue;
 					}
 
-					if ($ipCheck == $myIP)
+					if ($ipCheck === $myIP)
 					{
 						return true;
 					}
@@ -280,12 +280,12 @@ abstract class IpHelper
 					// Standard IPv4 address, i.e. 123.123.123.123 or partial IP address, i.e. 123.[123.][123.][123]
 					$dots = 0;
 
-					if (substr($ipExpression, -1) == '.')
+					if (substr($ipExpression, -1) === '.')
 					{
 						// Partial IP address. Convert to CIDR and re-match
 						foreach (count_chars($ipExpression, 1) as $i => $val)
 						{
-							if ($i == 46)
+							if ($i === 46)
 							{
 								$dots = $val;
 							}
@@ -351,7 +351,7 @@ abstract class IpHelper
 					{
 						$ip = @inet_pton(trim($ipExpression));
 
-						if ($ip == $myIP)
+						if ($ip === $myIP)
 						{
 							return true;
 						}
@@ -427,7 +427,7 @@ abstract class IpHelper
 	{
 		$ip = static::detectIP($allowOverride);
 
-		if (strstr($ip, ',') !== false || strstr($ip, ' ') !== false)
+		if (strpos($ip, ',') !== false || strpos($ip, ' ') !== false)
 		{
 			$ip  = str_replace(' ', ',', $ip);
 			$ip  = str_replace(',,', ',', $ip);
@@ -514,7 +514,7 @@ abstract class IpHelper
 	 */
 	protected static function inetToBits($inet)
 	{
-		if (\strlen($inet) == 4)
+		if (\strlen($inet) === 4)
 		{
 			$unpacked = unpack('A4', $inet);
 		}
