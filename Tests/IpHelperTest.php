@@ -218,6 +218,7 @@ class IpHelperTest extends TestCase
 			'fake.ip - IPv4 subnet'                             => array('fake.ip', self::IPv4_SUBNET, false),
 			'IPv4 address - empty range'                        => array(self::IPv4_ADDRESS, null, false),
 			'IPv4 address - invalid.ip/range'                   => array(self::IPv4_ADDRESS, 'invalid.ip/range', false),
+			'IPv4 address - partial invalid range'              => array(self::IPv4_ADDRESS, self::IPv4_ADDRESS . '-invalid', false),
 
 			'IPv6 expanded address - IPv6 expanded address'     => array(self::IPv6_EXPANDED_ADDRESS, self::IPv6_EXPANDED_ADDRESS, true),
 			'IPv6 expanded address - IPv6 compressed address'   => array(self::IPv6_EXPANDED_ADDRESS, self::IPv6_COMPRESSED_ADDRESS, true),
@@ -246,6 +247,7 @@ class IpHelperTest extends TestCase
 			'fake:ip - IPv6 subnet'                             => array('fake:ip', self::IPv6_SUBNET, false),
 			'IPv6 address - empty range'                        => array(self::IPv6_COMPRESSED_ADDRESS, null, false),
 			'IPv6 address - invalid:ip/range'                   => array(self::IPv6_COMPRESSED_ADDRESS, 'invalid:ip/range', false),
+			'IPv6 address - partial invalid range'              => array(self::IPv6_COMPRESSED_ADDRESS, self::IPv6_COMPRESSED_ADDRESS . '-invalid', false),
 		);
 	}
 
