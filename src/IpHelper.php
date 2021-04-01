@@ -384,12 +384,9 @@ abstract class IpHelper
 		{
 			$_SERVER['JOOMLA_REMOTE_ADDR'] = $_SERVER['REMOTE_ADDR'];
 		}
-		elseif (\function_exists('getenv'))
+		elseif (getenv('REMOTE_ADDR'))
 		{
-			if (getenv('REMOTE_ADDR'))
-			{
-				$_SERVER['JOOMLA_REMOTE_ADDR'] = getenv('REMOTE_ADDR');
-			}
+			$_SERVER['JOOMLA_REMOTE_ADDR'] = getenv('REMOTE_ADDR');
 		}
 
 		$_SERVER['REMOTE_ADDR'] = $ip;
@@ -482,15 +479,6 @@ abstract class IpHelper
 			{
 				return $_SERVER['REMOTE_ADDR'];
 			}
-		}
-
-		/*
-		 * This part is executed on PHP running as CGI, or on SAPIs which do not set the $_SERVER superglobal
-		 * If getenv() is disabled, you're screwed
-		 */
-		if (!\function_exists('getenv'))
-		{
-			return '';
 		}
 
 		// Do we have an x-forwarded-for HTTP header?
