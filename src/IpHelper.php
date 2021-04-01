@@ -322,7 +322,7 @@ abstract class IpHelper
 	}
 
 	/**
-	 * Converts inet_pton output to bits string
+	 * Converts IP address to bits string
 	 *
 	 * @param   string  $ip  The IPv4 or IPv6 address
 	 *
@@ -332,7 +332,7 @@ abstract class IpHelper
 	 */
 	private static function toBits($ip)
 	{
-		$packedIp = inet_pton($ip);
+		$packedIp = @inet_pton($ip);
 
 		if ($packedIp === false)
 		{
