@@ -145,7 +145,7 @@ abstract class IpHelper
 	 * @param   string  $ip       The IP to check
 	 * @param   string  $ipRange  The IP range; may be specified as from-to, CIDR or IP with netmask.
 	 *
-	 * @return bool
+	 * @return boolean
 	 */
 	private static function isInRange($ip, $ipRange)
 	{
@@ -251,7 +251,7 @@ abstract class IpHelper
 	 */
 	public static function setAllowIpOverrides($newState)
 	{
-		self::$allowIpOverrides = (bool)$newState;
+		self::$allowIpOverrides = (bool) $newState;
 	}
 
 	/**
