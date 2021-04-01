@@ -9,22 +9,20 @@
 namespace Joomla\Utilities;
 
 /**
- * IpHelper is a utility class for processing IP addresses
- *
- * This class is adapted from the `FOFUtilsIp` class distributed with the Joomla! CMS as part of the FOF library by Akeeba Ltd.
- * The original class is copyright of Nicholas K. Dionysopoulos / Akeeba Ltd.
+ * Utility class for processing IP addresses
  *
  * @since  1.6.0
  */
-final class IpHelper
+abstract class IpHelper
 {
 	/**
 	 * The IP address of the current visitor
 	 *
 	 * @var    string
 	 * @since  1.6.0
+	 * @deprecated 2.0 If you want to cache the IP address, you should handle that yourself.
 	 */
-	private static $ip = null;
+	private static $ip;
 
 	/**
 	 * Should I allow IP overrides through X-Forwarded-For or Client-Ip HTTP headers?
@@ -36,15 +34,6 @@ final class IpHelper
 	private static $allowIpOverrides = true;
 
 	/**
-	 * Private constructor to prevent instantiation of this class
-	 *
-	 * @since   1.6.0
-	 */
-	private function __construct()
-	{
-	}
-
-	/**
 	 * Get the current visitor's IP address
 	 *
 	 * @return  string
@@ -53,24 +42,19 @@ final class IpHelper
 	 */
 	public static function getIp()
 	{
-		if (self::$ip === null)
+		$ip = static::detectAndCleanIP();
+
+		if (!empty($ip) && ($ip != '0.0.0.0') && \function_exists('inet_pton') && \function_exists('inet_ntop'))
 		{
-			$ip = static::detectAndCleanIP();
+			$myIP = @inet_pton($ip);
 
-			if (!empty($ip) && ($ip != '0.0.0.0') && \function_exists('inet_pton') && \function_exists('inet_ntop'))
+			if ($myIP !== false)
 			{
-				$myIP = @inet_pton($ip);
-
-				if ($myIP !== false)
-				{
-					$ip = inet_ntop($myIP);
-				}
+				$ip = inet_ntop($myIP);
 			}
-
-			static::setIp($ip);
 		}
 
-		return self::$ip;
+		return $ip;
 	}
 
 	/**
@@ -81,6 +65,7 @@ final class IpHelper
 	 * @return  void
 	 *
 	 * @since   1.6.0
+	 * @deprecated 2.0 If you want to cache the IP address, you should handle that yourself.
 	 */
 	public static function setIp($ip)
 	{
@@ -383,6 +368,7 @@ final class IpHelper
 	 * @return  void
 	 *
 	 * @since   1.6.0
+	 * @deprecated 2.0 No replacement, this is never used
 	 */
 	public static function workaroundIPIssues()
 	{
