@@ -90,10 +90,26 @@ abstract class IpHelper
 	 *                                   Range may be specified as from-to, CIDR or IP with netmask.
 	 *
 	 * @return  boolean
-	 *
+	 * @deprecated 2.0 Use IpHelper::isInRanges() instead
 	 * @since   1.6.0
 	 */
-	public static function isInRanges($ip, $ipRanges = '')
+	public static function IPinList($ip, $ipRanges = '')
+	{
+		return self::isInRanges($ip, $ipRanges);
+	}
+
+	/**
+	 * Checks if an IP is contained in a list of IPs or IP expressions
+	 *
+	 * @param   string        $ip        The IPv4/IPv6 address to check
+	 * @param   array|string  $ipRanges  A comma-separated list or array of IP ranges to check against.
+	 *                                   Range may be specified as from-to, CIDR or IP with netmask.
+	 *
+	 * @return  boolean
+	 *
+	 * @since   __DEPLOY_VERSION__
+	 */
+	public static function isInRanges($ip, $ipRanges)
 	{
 		// Reject empty IPs or ANY_ADDRESS
 		if (empty($ip) || $ip === '0.0.0.0' || $ip === '::')
