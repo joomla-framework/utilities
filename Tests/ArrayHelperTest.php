@@ -4,6 +4,9 @@
  * @license    GNU General Public License version 2 or later; see LICENSE
  */
 
+namespace Joomla\Utilities\Tests;
+
+use ArrayObject;
 use Joomla\Utilities\ArrayHelper;
 use PHPUnit\Framework\TestCase;
 
@@ -57,7 +60,7 @@ class ArrayHelperTest extends TestCase
 
 		return array(
 			'Invalid input' => array(
-				// Array    The array being input
+				// Object   The object being input
 				null,
 				// Boolean  Recurse through multiple dimensions
 				null,
@@ -2127,7 +2130,6 @@ class ArrayHelperTest extends TestCase
 	 * @return  void
 	 *
 	 * @dataProvider  seedTestArrayUnique
-	 * @covers        Joomla\Utilities\ArrayHelper::arrayUnique
 	 * @since         1.0
 	 */
 	public function testArrayUnique($input, $expected)
@@ -2141,7 +2143,7 @@ class ArrayHelperTest extends TestCase
 	/**
 	 * Tests conversion of object to string.
 	 *
-	 * @param   array    $input     The array being input
+	 * @param   object   $input     The object being input
 	 * @param   boolean  $recurse   Recurse through multiple dimensions?
 	 * @param   string   $regex     Regex to select only some attributes
 	 * @param   string   $expect    The expected return value
@@ -2150,8 +2152,6 @@ class ArrayHelperTest extends TestCase
 	 * @return  void
 	 *
 	 * @dataProvider  seedTestFromObject
-	 * @covers        Joomla\Utilities\ArrayHelper::fromObject
-	 * @covers        Joomla\Utilities\ArrayHelper::arrayFromObject
 	 * @since         1.0
 	 */
 	public function testFromObject($input, $recurse, $regex, $expect, $defaults)
@@ -2181,7 +2181,6 @@ class ArrayHelperTest extends TestCase
 	 * @return  void
 	 *
 	 * @dataProvider  seedTestAddColumn
-	 * @covers        Joomla\Utilities\ArrayHelper::addColumn
 	 * @since         1.5.0
 	 */
 	public function testAddColumn($input, $column, $colName, $keyCol, $expect, $message)
@@ -2200,7 +2199,6 @@ class ArrayHelperTest extends TestCase
 	 * @return  void
 	 *
 	 * @dataProvider  seedTestDropColumn
-	 * @covers        Joomla\Utilities\ArrayHelper::dropColumn
 	 * @since         1.5.0
 	 */
 	public function testDropColumn($input, $colName, $expect, $message)
@@ -2220,7 +2218,6 @@ class ArrayHelperTest extends TestCase
 	 * @return  void
 	 *
 	 * @dataProvider  seedTestGetColumn
-	 * @covers        Joomla\Utilities\ArrayHelper::getColumn
 	 * @since         1.0
 	 */
 	public function testGetColumn($input, $valueCol, $keyCol, $expect, $message)
@@ -2242,7 +2239,6 @@ class ArrayHelperTest extends TestCase
 	 * @return  void
 	 *
 	 * @dataProvider  seedTestGetValue
-	 * @covers        Joomla\Utilities\ArrayHelper::getValue
 	 * @since         1.0
 	 */
 	public function testGetValue($input, $index, $default, $type, $expect, $message, $defaults)
@@ -2264,7 +2260,6 @@ class ArrayHelperTest extends TestCase
 	 *
 	 * @return  void
 	 *
-	 * @covers        Joomla\Utilities\ArrayHelper::getValue
 	 * @since         1.3.1
 	 */
 	public function testGetValueWithObjectImplementingArrayAccess()
@@ -2284,7 +2279,6 @@ class ArrayHelperTest extends TestCase
 	/**
 	 * @testdox  Verify that getValue() throws an \InvalidArgumentException when an object is given that doesn't implement \ArrayAccess
 	 *
-	 * @covers             Joomla\Utilities\ArrayHelper::getValue
 	 * @expectedException  \InvalidArgumentException
 	 * @since              1.3.1
 	 */
@@ -2296,6 +2290,7 @@ class ArrayHelperTest extends TestCase
 		$object->age = 20;
 		$object->address = null;
 
+		/** @noinspection PhpParamsInspection */
 		ArrayHelper::getValue($object, 'string');
 	}
 
@@ -2369,7 +2364,6 @@ class ArrayHelperTest extends TestCase
 	 * @return  void
 	 *
 	 * @dataProvider  seedTestPivot
-	 * @covers        Joomla\Utilities\ArrayHelper::pivot
 	 * @since         1.0
 	 */
 	public function testPivot($source, $key, $expected)
@@ -2395,7 +2389,6 @@ class ArrayHelperTest extends TestCase
 	 * @return  void
 	 *
 	 * @dataProvider  seedTestSortObject
-	 * @covers        Joomla\Utilities\ArrayHelper::sortObjects
 	 * @since         1.0
 	 */
 	public function testSortObjects($input, $key, $direction, $casesensitive, $locale, $expect, $message, $defaults, $swappable_keys = array())
@@ -2409,15 +2402,12 @@ class ArrayHelperTest extends TestCase
 		if (empty($input))
 		{
 			$this->markTestSkipped('Skip for MAC until PHP sort bug is fixed');
-
-			return;
 		}
-		elseif ($locale != false && !setlocale(LC_COLLATE, $locale))
+
+		if ($locale != false && !setlocale(LC_COLLATE, $locale))
 		{
 			// If the locale is not available, we can't have to transcode the string and can't reliably compare it.
 			$this->markTestSkipped("Locale {$locale} is not available.");
-
-			return;
 		}
 
 		if ($defaults)
@@ -2445,7 +2435,7 @@ class ArrayHelperTest extends TestCase
 	/**
 	 * Test convert an array to all integers.
 	 *
-	 * @param   string  $input    The array being input
+	 * @param   mixed   $input    The value being input
 	 * @param   string  $default  The default value
 	 * @param   string  $expect   The expected return value
 	 * @param   string  $message  The failure message
@@ -2453,7 +2443,6 @@ class ArrayHelperTest extends TestCase
 	 * @return  void
 	 *
 	 * @dataProvider  seedTestToInteger
-	 * @covers        Joomla\Utilities\ArrayHelper::toInteger
 	 * @since         1.0
 	 */
 	public function testToInteger($input, $default, $expect, $message)
@@ -2477,7 +2466,6 @@ class ArrayHelperTest extends TestCase
 	 * @return  void
 	 *
 	 * @dataProvider  seedTestToObject
-	 * @covers        Joomla\Utilities\ArrayHelper::toObject
 	 * @since         1.0
 	 */
 	public function testToObject($input, $className, $expect, $message)
@@ -2503,7 +2491,6 @@ class ArrayHelperTest extends TestCase
 	 * @return  void
 	 *
 	 * @dataProvider  seedTestToString
-	 * @covers        Joomla\Utilities\ArrayHelper::toString
 	 * @since         1.0
 	 */
 	public function testToString($input, $inner, $outer, $keepKey, $expect, $message, $defaults)
@@ -2525,7 +2512,6 @@ class ArrayHelperTest extends TestCase
 	 *
 	 * @return  void
 	 *
-	 * @covers  Joomla\Utilities\ArrayHelper::arraySearch
 	 * @since   1.0
 	 */
 	public function testArraySearch()
@@ -2550,7 +2536,6 @@ class ArrayHelperTest extends TestCase
 	 *
 	 * @return  void
 	 *
-	 * @covers  Joomla\Utilities\ArrayHelper::flatten
 	 * @since   1.0
 	 */
 	public function testFlatten()
