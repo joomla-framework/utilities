@@ -330,16 +330,14 @@ abstract class IpHelper
 
 		if (!$allowOverride)
 		{
-			$ip = ArrayHelper::getValue($_SERVER, 'REMOTE_ADDR', getenv('REMOTE_ADDR'));
+			return ArrayHelper::getValue($_SERVER, 'REMOTE_ADDR', getenv('REMOTE_ADDR'));
 		}
-		else
-		{
-			$ip = '';
 
-			foreach ($indexes as $index)
-			{
-				$ip = ArrayHelper::getValue($_SERVER, $index, $ip);
-			}
+		$ip = getenv('REMOTE_ADDR');
+
+		foreach ($indexes as $index)
+		{
+			$ip = ArrayHelper::getValue($_SERVER, $index, $ip);
 		}
 
 		return $ip;
