@@ -448,7 +448,7 @@ final class IpHelper
 
 			while (empty($ip) && !empty($ips))
 			{
-				$ip = array_pop($ips);
+				$ip = array_shift($ips);
 				$ip = trim($ip);
 			}
 		}
