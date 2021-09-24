@@ -29,22 +29,6 @@ abstract class RegEx
 
 		preg_match($regex, $subject, $match);
 
-		// @todo Remove this block, once minimum PHP version is raised above PHP 5.6.0
-		if (PHP_VERSION_ID < 50600)
-		{
-			$result = array();
-
-			foreach ($match as $key => $value)
-			{
-				if (!is_numeric($key) && !empty($value))
-				{
-					$result[$key] = $value;
-				}
-			}
-
-			return $result;
-		}
-
 		return array_filter(
 			$match,
 			function ($value, $key) {
