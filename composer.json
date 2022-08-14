@@ -11,7 +11,7 @@
     "license": "GPL-2.0-or-later",
     "require": {
         "php": "^7.2.5|~8.0.0|~8.1.0",
-        "joomla/string": "dev-php-8.2"
+        "joomla/string": "^2.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^8.5|^9.0"
