@@ -305,7 +305,31 @@ final class ArrayHelper
 	 */
 	public static function getColumn(array $array, $valueCol, $keyCol = null)
 	{
-		return array_column($array, $valueCol, $keyCol);
+		return \array_reduce(
+			$array,
+			function($result, $item) use ($keyCol, $valueCol) {
+				$array = \is_object($item) ? get_object_vars($item) : $item;
+
+				if ($valueCol === null) {
+					$value = $item;
+				} else {
+					if (!array_key_exists($valueCol, $array)) {
+						return $result;
+					}
+
+					$value = $array[$valueCol];
+				}
+
+				if ($keyCol !== null && \array_key_exists($keyCol, $array) && \is_scalar($array[$keyCol])) {
+					$result[$array[$keyCol]] = $value;
+				} else {
+					$result[] = $value;
+				}
+
+				return $result;
+			},
+			[]
+		);
 	}
 
 	/**
