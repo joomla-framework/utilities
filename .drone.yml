@@ -20,6 +20,7 @@
       },
       {
          "commands": [
+            "vendor/bin/phpcs --config-set installed_paths vendor/joomla/coding-standards",
             "vendor/bin/phpcs --standard=ruleset.xml"
          ],
          "depends": [
@@ -341,6 +342,6 @@
 }
 ---
 kind: signature
-hmac: a15eb57addbbc0ef1fa3ad14db89b66dfc19621a71177d3a4337d271824a256b
+hmac: d85d2b22c2b89e0b5c0f9d43c4d217971d539c006562972f32eccc33248c209f
 
 ...
