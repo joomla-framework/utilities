@@ -61,7 +61,7 @@ local pipeline(name, phpversion, params) = {
                 depends: [ "composer" ],
                 commands: [
                     "vendor/bin/phpcs --config-set installed_paths vendor/joomla/coding-standards",
-                    "vendor/bin/phpcs --standard=ruleset.xml"
+                    "vendor/bin/phpcs --standard=ruleset.xml src/"
                 ]
             },
             {
