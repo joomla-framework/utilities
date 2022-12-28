@@ -273,11 +273,11 @@ final class ArrayHelper
 
 		foreach ($array as $i => $item)
 		{
-			if (\is_object($item) && isset($item->$colName))
+			if (\is_object($item) && property_exists($item,$colName))
 			{
 				unset($item->$colName);
 			}
-			elseif (\is_array($item) && isset($item[$colName]))
+			elseif (\is_array($item) && array_key_exists($colName,$item))
 			{
 				unset($item[$colName]);
 			}
