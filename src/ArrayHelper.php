@@ -92,7 +92,7 @@ final class ArrayHelper
      *
      * @since   1.0
      */
-    public static function toString(array $array, $innerGlue = '=', $outerGlue = ' ', $keepOuterKey = false)
+    public static function toString(array $array, string $innerGlue = '=', string $outerGlue = ' ', $keepOuterKey = false)
     {
         $output = [];
 
@@ -309,7 +309,7 @@ final class ArrayHelper
      * @since   1.0
      * @throws  \InvalidArgumentException
      */
-    public static function getValue($array, $name, $default = null, $type = '')
+    public static function getValue($array, $name, $default = null, string $type = '')
     {
         if (!\is_array($array) && !($array instanceof \ArrayAccess)) {
             throw new \InvalidArgumentException('The object must be an array or an object that implements ArrayAccess');

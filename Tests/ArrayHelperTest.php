@@ -1129,11 +1129,11 @@ class ArrayHelperTest extends TestCase
         ];
 
         yield 'defaults' => [
-            $input, 'five', null, null, 5, 'Should get 5', true,
+            $input, 'five', null, '', 5, 'Should get 5', true,
         ];
 
         yield 'get non-value' => [
-            $input, 'fiveio', 198, null, 198, 'Should get the default value', false,
+            $input, 'fiveio', 198, '', 198, 'Should get the default value', false,
         ];
 
         yield 'get int 5' => [
@@ -2063,7 +2063,7 @@ class ArrayHelperTest extends TestCase
                 'integer' => 12, 'float' => 1.29999, 'string' => 'A Test String',
             ],
             null,
-            null,
+            ' ',
             false,
             'integer="12" float="1.29999" string="A Test String"',
             'Should turn array into single string with defaults',
@@ -2075,7 +2075,7 @@ class ArrayHelperTest extends TestCase
                 'integer' => 12, 'float' => 1.29999, 'string' => 'A Test String',
             ],
             " = ",
-            null,
+            '',
             true,
             'integer = "12"float = "1.29999"string = "A Test String"',
             'Should turn array into single string with " = " and no spaces',
@@ -2107,7 +2107,7 @@ class ArrayHelperTest extends TestCase
                 ],
             ],
             null,
-            null,
+            ' ',
             false,
             'integer="12" float="1.29999" string="A Test String" integer="12" float="1.29999" string="A Test String" integer="12" float="1.29999" string="A Test String"',
             'Should turn multiple dimension array into single string',
@@ -2127,7 +2127,7 @@ class ArrayHelperTest extends TestCase
                 ],
             ],
             ' = ',
-            null,
+            '',
             false,
             'integer = "12"float = "1.29999"string = "A Test String"integer = "12"float = "1.29999"string = "A Test String"integer = "12"float = "1.29999"string = "A Test String"',
             'Should turn multiple dimension array into single string with " = " and no spaces',
@@ -2167,7 +2167,7 @@ class ArrayHelperTest extends TestCase
                 ],
             ],
             ' = ',
-            null,
+            '',
             true,
             'firstinteger = "12"float = "1.29999"string = "A Test String"secondinteger = "12"float = "1.29999"string = "A Test String"thirdinteger = "12"float = "1.29999"string = "A Test String"',
             'Should turn multiple dimension array into single string with " = " and no spaces with outer key',
