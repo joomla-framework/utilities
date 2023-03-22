@@ -183,9 +183,8 @@ final class IpHelper
                 if (($myIP >= $from) && ($myIP <= $to)) {
                     return true;
                 }
-            }
-            // Netmask or CIDR provided
-            elseif (strstr($ipExpression, '/')) {
+            } elseif (strstr($ipExpression, '/')) {
+                // Netmask or CIDR provided
                 $binaryip = static::inetToBits($myIP);
 
                 list($net, $maskbits) = explode('/', $ipExpression, 2);
