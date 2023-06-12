@@ -2299,7 +2299,7 @@ class ArrayHelperTest extends TestCase
 
         $arrayObject = new \ArrayObject($array);
 
-        $this->assertEquals('Joe', ArrayHelper::getValue($arrayObject, 'name'), 'An object implementing \ArrayAccess should succesfully retrieve the value of an object');
+        $this->assertEquals('Joe', ArrayHelper::getValue($arrayObject, 'name'), 'An object implementing \ArrayAccess should successfully retrieve the value of an object');
     }
 
     /**
