@@ -707,13 +707,12 @@ final class ArrayHelper
             $type = gettype($val);
             $val = trim($val);
 
-            if ($onlyPositive && is_numeric($val) && $val >= 0) {
-                settype($val, $type);
-                $new_array[$i] = $val;
-            } elseif (is_numeric($number)) {
-                settype($val, $type);
-                $new_array[$i] = $val;
+            if (!is_numeric($val) || $onlyPositive && $val < 0) {
+                continue;
             }
+
+            settype($val, $type);
+            $new_array[$i] = $val;
         }
 
         return $new_array;
