@@ -693,29 +693,29 @@ final class ArrayHelper
      *
      * @param   array  $array  The original unfiltered.
      * @param   bool  $onlyPositive  Mode for filtering only positive numbers.
-     * 
+     *
      * @return  array  Filtered array.
      *
      * @since   2.0.0
      * @throws  \InvalidArgumentException
      */
-    public static function filterNum($array = [], $onlyPositive = true) : array
+    public static function filterNum($array = [], $onlyPositive = true): array
     {
-		$new_array = [];
+        $new_array = [];
 
-		foreach ($array as $i => $val) {
-			$type = gettype($val);
-			$val = trim($val);
+        foreach ($array as $i => $val) {
+            $type = gettype($val);
+            $val = trim($val);
 
-			if($onlyPositive && is_numeric($val) && $val >= 0 ) {
-				settype ($val, $type);
-				$new_array[$i] = $val;
-			} elseif (is_numeric($number)) {
-				settype ($val, $type);
-				$new_array[$i] = $val;
-			}
-		}
+            if($onlyPositive && is_numeric($val) && $val >= 0 ) {
+                settype ($val, $type);
+                $new_array[$i] = $val;
+            } elseif (is_numeric($number)) {
+                settype ($val, $type);
+                $new_array[$i] = $val;
+            }
+        }
 
-		return $new_array;
+        return $new_array;
     }
 }
