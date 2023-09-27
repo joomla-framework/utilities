@@ -699,7 +699,7 @@ final class ArrayHelper
      * @since   2.0.0
      * @throws  \InvalidArgumentException
      */
-    public static function filterNum($array = [], $onlyPositive = true): array
+    public static function filterNumeric($array = [], $onlyPositive = true): array
     {
         $new_array = [];
 
