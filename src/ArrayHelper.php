@@ -699,22 +699,20 @@ final class ArrayHelper
      * @since   2.0.0
      * @throws  \InvalidArgumentException
      */
-    public static function filterNumeric($array = [], $onlyPositive = true): array
+    public static function filterNumeric(array $array, $onlyPositive = true): array
     {
-        $new_array = [];
+        $result = [];
 
         foreach ($array as $i => $val) {
             $type = gettype($val);
             $val = trim($val);
 
-            if (!is_numeric($val) || $onlyPositive && $val < 0) {
-                continue;
+            if (is_numeric($val) && (!$onlyPositive || $val >= 0)) {
+                settype($val, $type);
+                $result[$i] = $val;
             }
-
-            settype($val, $type);
-            $new_array[$i] = $val;
         }
 
-        return $new_array;
+        return $result;
     }
 }
