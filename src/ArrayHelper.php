@@ -687,4 +687,32 @@ final class ArrayHelper
 
         return $result;
     }
+
+    /**
+     * Returns an array with numeric values only.
+     *
+     * @param   array  $array  The original unfiltered.
+     * @param   bool  $onlyPositive  Mode for filtering only positive numbers.
+     *
+     * @return  array  Filtered array.
+     *
+     * @since   2.0.0
+     * @throws  \InvalidArgumentException
+     */
+    public static function filterNumeric(array $array, $onlyPositive = true): array
+    {
+        $result = [];
+
+        foreach ($array as $i => $val) {
+            $type = gettype($val);
+            $val = trim($val);
+
+            if (is_numeric($val) && (!$onlyPositive || $val >= 0)) {
+                settype($val, $type);
+                $result[$i] = $val;
+            }
+        }
+
+        return $result;
+    }
 }
