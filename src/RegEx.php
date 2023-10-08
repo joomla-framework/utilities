@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Part of the Joomla Framework Utilities Package
  *
@@ -15,92 +16,91 @@ namespace Joomla\Utilities;
  */
 abstract class RegEx
 {
-	/**
-	 * Match the Regular Expression
-	 *
-	 * @param   string  $regex    The Regular Expression
-	 * @param   string  $subject  The string to check
-	 *
-	 * @return  array  Captured values
-	 */
-	public static function match($regex, $subject)
-	{
-		$match = array();
+    /**
+     * Match the Regular Expression
+     *
+     * @param   string  $regex    The Regular Expression
+     * @param   string  $subject  The string to check
+     *
+     * @return  array  Captured values
+     */
+    public static function match($regex, $subject)
+    {
+        $match = array();
 
-		preg_match($regex, $subject, $match);
+        preg_match($regex, $subject, $match);
 
-		return array_filter(
-			$match,
-			static function ($value, $key) {
-				return !is_numeric($key) && !empty($value);
-			},
-			ARRAY_FILTER_USE_BOTH
-		);
-	}
+        return array_filter(
+            $match,
+            static function ($value, $key) {
+                return !is_numeric($key) && !empty($value);
+            },
+            ARRAY_FILTER_USE_BOTH
+        );
+    }
 
-	/**
-	 * Assign a key to an expression.
-	 *
-	 * @param   string  $regex  The Regular Expression to match
-	 * @param   string  $as     The name of the component, used as index
-	 *
-	 * @return  string  The modified Regular Expression
-	 */
-	public static function capture($regex, $as = null)
-	{
-		return '(?P<' . $as . '>' . $regex . ')';
-	}
+    /**
+     * Assign a key to an expression.
+     *
+     * @param   string  $regex  The Regular Expression to match
+     * @param   string  $as     The name of the component, used as index
+     *
+     * @return  string  The modified Regular Expression
+     */
+    public static function capture($regex, $as = null)
+    {
+        return '(?P<' . $as . '>' . $regex . ')';
+    }
 
-	/**
-	 * Add a 'zero or one' quantifier to an expression.
-	 *
-	 * @param   string  $regex  The Regular Expression to match
-	 *
-	 * @return  string  The modified Regular Expression
-	 */
-	public static function optional($regex)
-	{
-		return '(?:' . $regex . ')?';
-	}
+    /**
+     * Add a 'zero or one' quantifier to an expression.
+     *
+     * @param   string  $regex  The Regular Expression to match
+     *
+     * @return  string  The modified Regular Expression
+     */
+    public static function optional($regex)
+    {
+        return '(?:' . $regex . ')?';
+    }
 
-	/**
-	 * Add a 'one or more' quantifier to an expression.
-	 *
-	 * @param   string  $regex  The Regular Expression to match
-	 *
-	 * @return  string  The modified Regular Expression
-	 */
-	public static function oneOrMore($regex)
-	{
-		return '(?:' . $regex . ')+';
-	}
+    /**
+     * Add a 'one or more' quantifier to an expression.
+     *
+     * @param   string  $regex  The Regular Expression to match
+     *
+     * @return  string  The modified Regular Expression
+     */
+    public static function oneOrMore($regex)
+    {
+        return '(?:' . $regex . ')+';
+    }
 
-	/**
-	 * Add a 'zero or more' quantifier to an expression.
-	 *
-	 * @param   string  $regex  The Regular Expression to match
-	 *
-	 * @return  string  The modified Regular Expression
-	 */
-	public static function noneOrMore($regex)
-	{
-		return '(?:' . $regex . ')*';
-	}
+    /**
+     * Add a 'zero or more' quantifier to an expression.
+     *
+     * @param   string  $regex  The Regular Expression to match
+     *
+     * @return  string  The modified Regular Expression
+     */
+    public static function noneOrMore($regex)
+    {
+        return '(?:' . $regex . ')*';
+    }
 
-	/**
-	 * Define a list of alternative expressions.
-	 *
-	 * @param   string|array  $regexList  A list of Regular Expressions to choose from
-	 *
-	 * @return  string  The modified Regular Expression
-	 */
-	public static function anyOf($regexList)
-	{
-		if (is_string($regexList))
-		{
-			$regexList = func_get_args();
-		}
+    /**
+     * Define a list of alternative expressions.
+     *
+     * @param   string|array  $regexList  A list of Regular Expressions to choose from
+     *
+     * @return  string  The modified Regular Expression
+     */
+    public static function anyOf($regexList)
+    {
+        if (is_string($regexList)) {
+            $regexList = func_get_args();
+        }
 
-		return '(?:' . implode('|', $regexList) . ')';
-	}
+        return '(?:' . implode('|', $regexList) . ')';
+    }
 }
