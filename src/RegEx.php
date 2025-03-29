@@ -12,7 +12,7 @@ namespace Joomla\Utilities;
 /**
  * Utility class for building complex Regular Expressions
  *
- * @since __DEPLOY_VERSION__
+ * @since 3.0.0
  */
 abstract class RegEx
 {
