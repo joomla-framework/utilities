@@ -1,115 +1,76 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Call to function is_array\(\) with \*NEVER\* will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
+			message: "#^Method Joomla\\\\Utilities\\\\ArrayHelper\\:\\:arrayFromObject\\(\\) should return array but returns mixed\\.$#"
 			count: 1
 			path: src/ArrayHelper.php
 
 		-
-			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 3
-			path: src/ArrayHelper.php
-
-		-
-			message: '#^Call to function is_object\(\) with object will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
+			message: "#^Result of && is always false\\.$#"
 			count: 1
 			path: src/ArrayHelper.php
 
 		-
-			message: '#^Instanceof between ArrayAccess and ArrayAccess will always evaluate to true\.$#'
-			identifier: instanceof.alwaysTrue
+			message: "#^Result of \\|\\| is always true\\.$#"
 			count: 1
 			path: src/ArrayHelper.php
 
 		-
-			message: '#^Method Joomla\\Utilities\\ArrayHelper\:\:arrayFromObject\(\) should return array but returns mixed\.$#'
-			identifier: return.type
+			message: "#^Strict comparison using \\=\\=\\= between string and null will always evaluate to false\\.$#"
 			count: 1
 			path: src/ArrayHelper.php
 
 		-
-			message: '#^Result of && is always false\.$#'
-			identifier: booleanAnd.alwaysFalse
-			count: 1
-			path: src/ArrayHelper.php
-
-		-
-			message: '#^Result of \|\| is always true\.$#'
-			identifier: booleanOr.alwaysTrue
-			count: 1
-			path: src/ArrayHelper.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between string and null will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: src/ArrayHelper.php
-
-		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
+			message: "#^Unreachable statement \\- code above always terminates\\.$#"
 			count: 2
 			path: src/ArrayHelper.php
 
 		-
-			message: '#^Variable \$caseSensitive might not be defined\.$#'
-			identifier: variable.undefined
+			message: "#^Variable \\$caseSensitive might not be defined\\.$#"
 			count: 1
 			path: src/ArrayHelper.php
 
 		-
-			message: '#^Variable \$colName in isset\(\) always exists and is not nullable\.$#'
-			identifier: isset.variable
+			message: "#^Variable \\$colName in isset\\(\\) always exists and is not nullable\\.$#"
 			count: 2
 			path: src/ArrayHelper.php
 
 		-
-			message: '#^Variable \$direction might not be defined\.$#'
-			identifier: variable.undefined
+			message: "#^Variable \\$direction might not be defined\\.$#"
 			count: 2
 			path: src/ArrayHelper.php
 
 		-
-			message: '#^Variable \$locale might not be defined\.$#'
-			identifier: variable.undefined
+			message: "#^Variable \\$locale might not be defined\\.$#"
 			count: 2
 			path: src/ArrayHelper.php
 
 		-
-			message: '#^Parameter \#3 \$length of function substr expects int\|null, float given\.$#'
-			identifier: argument.type
+			message: "#^Parameter \\#3 \\$length of function substr expects int\\|null, float given\\.$#"
 			count: 2
 			path: src/IpHelper.php
 
 		-
-			message: '#^Parameter \#3 \$length of function substr expects int\|null, float\|string given\.$#'
-			identifier: argument.type
+			message: "#^Parameter \\#3 \\$length of function substr expects int\\|null, float\\|string given\\.$#"
 			count: 2
 			path: src/IpHelper.php
 
 		-
-			message: '#^Parameter \#3 \$length of function substr expects int\|null, string given\.$#'
-			identifier: argument.type
+			message: "#^Parameter \\#3 \\$length of function substr expects int\\|null, string given\\.$#"
 			count: 2
 			path: src/IpHelper.php
 
 		-
-			message: '#^Ternary operator condition is always false\.$#'
-			identifier: ternary.alwaysFalse
+			message: "#^Ternary operator condition is always false\\.$#"
 			count: 1
 			path: src/IpHelper.php
 
 		-
-			message: '#^Variable \$_SERVER in isset\(\) always exists and is not nullable\.$#'
-			identifier: isset.variable
+			message: "#^Variable \\$_SERVER in isset\\(\\) always exists and is not nullable\\.$#"
 			count: 1
 			path: src/IpHelper.php
 
 		-
-			message: '#^Variable \$netmask might not be defined\.$#'
-			identifier: variable.undefined
+			message: "#^Variable \\$netmask might not be defined\\.$#"
 			count: 1
 			path: src/IpHelper.php
