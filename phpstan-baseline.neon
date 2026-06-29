@@ -79,6 +79,12 @@ parameters:
 			path: src/ArrayHelper.php
 
 		-
+			message: '#^Offset ''HTTP_CLIENT_IP'' on \*NEVER\* in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.offset
+			count: 1
+			path: src/IpHelper.php
+
+		-
 			message: '#^Parameter \#3 \$length of function substr expects int\|null, float given\.$#'
 			identifier: argument.type
 			count: 2
@@ -105,11 +111,5 @@ parameters:
 		-
 			message: '#^Variable \$_SERVER in isset\(\) always exists and is not nullable\.$#'
 			identifier: isset.variable
-			count: 1
-			path: src/IpHelper.php
-
-		-
-			message: '#^Variable \$netmask might not be defined\.$#'
-			identifier: variable.undefined
 			count: 1
 			path: src/IpHelper.php
