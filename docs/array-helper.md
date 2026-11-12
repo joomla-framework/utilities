@@ -322,6 +322,12 @@ array(3) {
 ```
 
 ### arrayUnique
+
+Removes duplicate values, comparing them by their serialized form, so arrays and objects can be
+compared as well. The first occurrence of each value is kept with its key. The returned values are the
+original ones, so objects keep their identity. Values that cannot be serialized, such as closures,
+throw an exception.
+
 ```php
 use Joomla\Utilities\ArrayHelper;
 

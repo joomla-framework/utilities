@@ -583,6 +583,9 @@ final class ArrayHelper
     /**
      * Multidimensional array safe unique test
      *
+     * Values are compared by their serialized form. The first occurrence of each value is kept with its key; the
+     * values themselves are returned unchanged, not as unserialized copies.
+     *
      * @param   array  $array  The array to make unique.
      *
      * @return  array
@@ -592,11 +595,7 @@ final class ArrayHelper
      */
     public static function arrayUnique(array $array)
     {
-        $array = array_map('serialize', $array);
-        $array = array_unique($array);
-        $array = array_map('unserialize', $array);
-
-        return $array;
+        return array_intersect_key($array, array_unique(array_map('serialize', $array)));
     }
 
     /**
