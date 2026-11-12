@@ -35,6 +35,14 @@ final class IpHelper
     private static $allowIpOverrides = false;
 
     /**
+     * The proxies whose X-Forwarded-For entries are trusted, as IP expressions understood by IPinList()
+     *
+     * @var    string[]
+     * @since  __DEPLOY_VERSION__
+     */
+    private static $trustedProxies = [];
+
+    /**
      * Private constructor to prevent instantiation of this class
      *
      * @since   1.6.0
@@ -372,14 +380,32 @@ final class IpHelper
     }
 
     /**
+     * Set the proxies whose X-Forwarded-For entries are trusted
+     *
+     * Only takes effect when IP overrides are allowed. The proxy headers are then only used if REMOTE_ADDR is one
+     * of these proxies, and X-Forwarded-For is read from the right, skipping the entries of trusted proxies. An
+     * empty list restores the default: the first X-Forwarded-For entry is used, whoever sent it.
+     *
+     * @param   string[]  $proxies  IP addresses, ranges or CIDR blocks, in any form IPinList() accepts
+     *
+     * @return  void
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    public static function setTrustedProxies(array $proxies): void
+    {
+        self::$trustedProxies = array_values($proxies);
+    }
+
+    /**
      * Gets the visitor's IP address.
      *
-     * Automatically handles reverse proxies reporting the IPs of intermediate devices, like load balancers. Examples:
+     * Without overrides, this is REMOTE_ADDR. With overrides allowed, the X-Forwarded-For header is used
+     * (and, deprecated, the Client-Ip header). If trusted proxies are set, the headers are only used when the
+     * request comes from one of them, and X-Forwarded-For is read from the right, skipping trusted proxies.
      *
-     * - https://www.akeebabackup.com/support/admin-tools/13743-double-ip-adresses-in-security-exception-log-warnings.html
-     * - https://stackoverflow.com/questions/2422395/why-is-request-envremote-addr-returning-two-ips
-     *
-     * The solution used is assuming that the last IP address is the external one.
+     * Each candidate is reduced to its first entry if it holds a comma- or space-separated list, and must be a
+     * valid IP address; otherwise the next source is tried. An invalid REMOTE_ADDR gives an empty string.
      *
      * @return  string
      *
@@ -387,77 +413,128 @@ final class IpHelper
      */
     protected static function detectAndCleanIP()
     {
-        $ip = static::detectIP();
+        $remoteAddr = static::cleanIP(static::getServerVariable('REMOTE_ADDR'));
 
-        if (strstr($ip, ',') !== false || strstr($ip, ' ') !== false) {
-            $ip  = str_replace(' ', ',', $ip);
-            $ip  = str_replace(',,', ',', $ip);
-            $ips = explode(',', $ip);
-            $ip  = '';
-
-            while (empty($ip) && !empty($ips)) {
-                $ip = array_shift($ips);
-                $ip = trim($ip);
-            }
-        } else {
-            $ip = trim($ip);
+        if (!self::$allowIpOverrides) {
+            return $remoteAddr;
         }
 
-        return $ip;
+        if (self::$trustedProxies !== []) {
+            // Proxy headers are only trustworthy when the request comes from a trusted proxy
+            if ($remoteAddr === '' || !static::IPinList($remoteAddr, self::$trustedProxies)) {
+                return $remoteAddr;
+            }
+
+            $ip = static::getClientFromForwardedFor(static::getServerVariable('HTTP_X_FORWARDED_FOR'));
+        } else {
+            $ip = static::cleanIP(static::getServerVariable('HTTP_X_FORWARDED_FOR'));
+        }
+
+        if ($ip !== '') {
+            return $ip;
+        }
+
+        $ip = static::cleanIP(static::getServerVariable('HTTP_CLIENT_IP'));
+
+        if ($ip !== '') {
+            trigger_deprecation(
+                'joomla/utilities',
+                '__DEPLOY_VERSION__',
+                'Reading the client IP address from the Client-Ip header is deprecated and will be removed in 5.0.'
+                . ' Use the X-Forwarded-For header, together with %s::setTrustedProxies().',
+                self::class
+            );
+
+            return $ip;
+        }
+
+        return $remoteAddr;
     }
 
     /**
-     * Gets the visitor's IP address
+     * Reduces a comma- or space-separated list of addresses to its first entry and validates it
      *
-     * @return  string
+     * @param   string  $ip  The raw value
      *
-     * @since   1.6.0
+     * @return  string  The address, or an empty string if it is not a valid IP address
+     *
+     * @since   __DEPLOY_VERSION__
      */
-    protected static function detectIP()
+    private static function cleanIP(string $ip): string
     {
-        // Normally the $_SERVER superglobal is set
-        if (isset($_SERVER)) {
-            // Do we have an x-forwarded-for HTTP header (e.g. NginX)?
-            if (self::$allowIpOverrides && isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-                return $_SERVER['HTTP_X_FORWARDED_FOR'];
-            }
+        foreach (explode(',', str_replace(' ', ',', $ip)) as $entry) {
+            $entry = trim($entry);
 
-            // Do we have a client-ip header (e.g. non-transparent proxy)?
-            if (self::$allowIpOverrides && isset($_SERVER['HTTP_CLIENT_IP'])) {
-                return $_SERVER['HTTP_CLIENT_IP'];
-            }
-
-            // Normal, non-proxied server or server behind a transparent proxy
-            if (isset($_SERVER['REMOTE_ADDR'])) {
-                return $_SERVER['REMOTE_ADDR'];
+            if ($entry !== '') {
+                return filter_var($entry, FILTER_VALIDATE_IP) !== false ? $entry : '';
             }
         }
 
-        /*
-         * This part is executed on PHP running as CGI, or on SAPIs which do not set the $_SERVER superglobal
-         * If getenv() is disabled, you're screwed
-         */
+        return '';
+    }
+
+    /**
+     * Finds the client address in an X-Forwarded-For header sent by a trusted proxy
+     *
+     * The header is read from the right. Entries of trusted proxies are skipped; the first other entry is the
+     * client. If every entry is a trusted proxy, or an entry is not a valid IP address, the last trusted proxy
+     * seen is returned.
+     *
+     * @param   string  $forwardedFor  The X-Forwarded-For header
+     *
+     * @return  string  The client address, or an empty string if the header holds none
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    private static function getClientFromForwardedFor(string $forwardedFor): string
+    {
+        $client = '';
+        $hops   = array_reverse(explode(',', str_replace(' ', ',', $forwardedFor)));
+
+        foreach ($hops as $hop) {
+            $hop = trim($hop);
+
+            if ($hop === '') {
+                continue;
+            }
+
+            if (filter_var($hop, FILTER_VALIDATE_IP) === false) {
+                break;
+            }
+
+            $client = $hop;
+
+            if (!static::IPinList($hop, self::$trustedProxies)) {
+                break;
+            }
+        }
+
+        return $client;
+    }
+
+    /**
+     * Reads a server variable from $_SERVER, falling back to the environment for SAPIs which do not set it
+     *
+     * @param   string  $name  The name of the variable
+     *
+     * @return  string
+     *
+     * @since   __DEPLOY_VERSION__
+     */
+    private static function getServerVariable(string $name): string
+    {
+        if (isset($_SERVER[$name])) {
+            return (string) $_SERVER[$name];
+        }
+
+        // getenv() may be disabled
         if (!\function_exists('getenv')) {
             return '';
         }
 
-        // Do we have an x-forwarded-for HTTP header?
-        if (self::$allowIpOverrides && getenv('HTTP_X_FORWARDED_FOR')) {
-            return getenv('HTTP_X_FORWARDED_FOR');
-        }
+        $value = getenv($name);
 
-        // Do we have a client-ip header?
-        if (self::$allowIpOverrides && getenv('HTTP_CLIENT_IP')) {
-            return getenv('HTTP_CLIENT_IP');
-        }
-
-        // Normal, non-proxied server or server behind a transparent proxy
-        if (getenv('REMOTE_ADDR')) {
-            return getenv('REMOTE_ADDR');
-        }
-
-        // Catch-all case for broken servers, apparently
-        return '';
+        return \is_string($value) ? $value : '';
     }
 
     /**

@@ -11,6 +11,7 @@ use Joomla\Utilities\IpHelper;
 use PHPUnit\Framework\Attributes\BackupGlobals;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -29,12 +30,14 @@ class IpHelperTest extends TestCase
 
         IpHelper::setIp(null);
         IpHelper::setAllowIpOverrides(false);
+        IpHelper::setTrustedProxies([]);
     }
 
     protected function tearDown(): void
     {
         IpHelper::setIp(null);
         IpHelper::setAllowIpOverrides(false);
+        IpHelper::setTrustedProxies([]);
 
         parent::tearDown();
     }
@@ -111,12 +114,19 @@ class IpHelperTest extends TestCase
         $this->assertSame('203.0.113.9', IpHelper::getIp());
     }
 
+    #[IgnoreDeprecations]
     public function testClientIpHeaderIsUsedWhenOverridesAreAllowed()
     {
         IpHelper::setAllowIpOverrides(true);
 
         $_SERVER['REMOTE_ADDR']    = '198.51.100.7';
         $_SERVER['HTTP_CLIENT_IP'] = '203.0.113.9';
+
+        $this->expectUserDeprecationMessage(
+            'Since joomla/utilities __DEPLOY_VERSION__: Reading the client IP address from the Client-Ip header is'
+            . ' deprecated and will be removed in 5.0. Use the X-Forwarded-For header, together with'
+            . ' Joomla\Utilities\IpHelper::setTrustedProxies().'
+        );
 
         $this->assertSame('203.0.113.9', IpHelper::getIp());
     }
@@ -130,6 +140,81 @@ class IpHelperTest extends TestCase
         $_SERVER['HTTP_X_FORWARDED_FOR'] = '192.0.2.4';
 
         $this->assertSame('192.0.2.4', IpHelper::getIp());
+    }
+
+    public static function invalidRemoteAddrData(): array
+    {
+        return [
+            'not an address'      => ['fake'],
+            'markup'              => ['<script>'],
+            'out of range octet'  => ['198.51.100.256'],
+            'invalid first entry' => ['fake, 198.51.100.7'],
+        ];
+    }
+
+    #[DataProvider('invalidRemoteAddrData')]
+    public function testGetIpReturnsAnEmptyStringForAnInvalidRemoteAddr(string $remoteAddr)
+    {
+        $_SERVER['REMOTE_ADDR'] = $remoteAddr;
+
+        $this->assertSame('', IpHelper::getIp());
+    }
+
+    public function testInvalidForwardedHeaderFallsBackToRemoteAddr()
+    {
+        IpHelper::setAllowIpOverrides(true);
+
+        $_SERVER['REMOTE_ADDR']          = '198.51.100.7';
+        $_SERVER['HTTP_X_FORWARDED_FOR'] = '<script>, 203.0.113.9';
+
+        $this->assertSame('198.51.100.7', IpHelper::getIp());
+    }
+
+    public function testInvalidClientIpHeaderFallsBackToRemoteAddr()
+    {
+        IpHelper::setAllowIpOverrides(true);
+
+        $_SERVER['REMOTE_ADDR']    = '198.51.100.7';
+        $_SERVER['HTTP_CLIENT_IP'] = 'fake';
+
+        $this->assertSame('198.51.100.7', IpHelper::getIp());
+    }
+
+    public static function trustedProxiesData(): array
+    {
+        return [
+            'request not from a trusted proxy' => ['203.0.113.50', '198.51.100.7', '203.0.113.50'],
+            'single client entry'              => ['192.0.2.1', '198.51.100.7', '198.51.100.7'],
+            'spoofed entry left of the client' => ['192.0.2.1', '203.0.113.9, 198.51.100.7', '198.51.100.7'],
+            'trusted proxies are skipped'      => ['192.0.2.1', '203.0.113.9, 198.51.100.7, 192.0.2.5', '198.51.100.7'],
+            'space-separated chain'            => ['192.0.2.1', '203.0.113.9 198.51.100.7', '198.51.100.7'],
+            'only trusted proxies'             => ['192.0.2.1', '192.0.2.7, 192.0.2.5', '192.0.2.7'],
+            'invalid entry stops the walk'     => ['192.0.2.1', '203.0.113.9, <script>, 192.0.2.5', '192.0.2.5'],
+            'invalid client entry'             => ['192.0.2.1', '<script>', '192.0.2.1'],
+            'empty header'                     => ['192.0.2.1', '', '192.0.2.1'],
+        ];
+    }
+
+    #[DataProvider('trustedProxiesData')]
+    public function testForwardedHeaderWithTrustedProxies(string $remoteAddr, string $forwardedFor, string $expected)
+    {
+        IpHelper::setAllowIpOverrides(true);
+        IpHelper::setTrustedProxies(['192.0.2.0/24']);
+
+        $_SERVER['REMOTE_ADDR']          = $remoteAddr;
+        $_SERVER['HTTP_X_FORWARDED_FOR'] = $forwardedFor;
+
+        $this->assertSame($expected, IpHelper::getIp());
+    }
+
+    public function testTrustedProxiesNeedOverridesToBeAllowed()
+    {
+        IpHelper::setTrustedProxies(['192.0.2.0/24']);
+
+        $_SERVER['REMOTE_ADDR']          = '192.0.2.1';
+        $_SERVER['HTTP_X_FORWARDED_FOR'] = '198.51.100.7';
+
+        $this->assertSame('192.0.2.1', IpHelper::getIp());
     }
 
     public static function isIPv6Data(): array
