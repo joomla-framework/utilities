@@ -175,12 +175,17 @@ final class IpHelper
                     continue;
                 }
 
+                // Packed addresses are compared with strcmp(): <, > and == treat numeric-looking strings as numbers
+                if (\strlen($from) !== \strlen($myIP) || \strlen($to) !== \strlen($myIP)) {
+                    continue;
+                }
+
                 // Swap from/to if they're in the wrong order
-                if ($from > $to) {
+                if (strcmp($from, $to) > 0) {
                     list($from, $to) = [$to, $from];
                 }
 
-                if (($myIP >= $from) && ($myIP <= $to)) {
+                if (strcmp($myIP, $from) >= 0 && strcmp($myIP, $to) <= 0) {
                     return true;
                 }
             } elseif (strstr($ipExpression, '/')) {
@@ -250,7 +255,7 @@ final class IpHelper
                         continue;
                     }
 
-                    if ($ipCheck == $myIP) {
+                    if ($ipCheck === $myIP) {
                         return true;
                     }
                 } else {
@@ -320,7 +325,7 @@ final class IpHelper
                     if (!$dots) {
                         $ip = @inet_pton(trim($ipExpression));
 
-                        if ($ip == $myIP) {
+                        if ($ip === $myIP) {
                             return true;
                         }
                     }

@@ -221,6 +221,30 @@ class IpHelperTest extends TestCase
         $this->assertSame($expected, IpHelper::IPinList($ip, $ipTable));
     }
 
+    /**
+     * Packed addresses that look like numeric strings, e.g. inet_pton('49.48.32.32') is '10  ' and
+     * inet_pton('49.101.51.48') is '1e30', must still be compared byte by byte.
+     */
+    public static function ipInListBinaryComparisonData(): array
+    {
+        return [
+            'exact, numeric-looking'          => ['49.48.32.32', '48.48.49.48', false],
+            'exact, exponent-looking'         => ['49.101.51.48', '49.69.51.48', false],
+            'exact, exponent-looking, hit'    => ['49.101.51.48', '49.101.51.48', true],
+            'range, exponent-looking inside'  => ['49.101.49.48', '49.48.48.48-57.57.57.57', true],
+            'range, exponent-looking outside' => ['49.48.48.47', '49.48.48.48-57.57.57.57', false],
+            'range, numeric-looking ends'     => ['49.50.48.48', '49.49.48.48-49.51.48.48', true],
+            'range, reversed numeric ends'    => ['49.50.48.48', '49.51.48.48-49.49.48.48', true],
+            'IPv6 exact, numeric-looking'     => ['2020:2020:2020:2020:2020:2020:3165:3135', '3130:3030:3030:3030:3030:3030:3030:3030', false],
+        ];
+    }
+
+    #[DataProvider('ipInListBinaryComparisonData')]
+    public function testIPinListComparesPackedAddressesAsBinaryStrings(string $ip, string $ipTable, bool $expected)
+    {
+        $this->assertSame($expected, IpHelper::IPinList($ip, $ipTable));
+    }
+
     public function testIPv6CidrMatch()
     {
         $this->assertTrue(IpHelper::IPinList('2001:db8:0:2f3b::1', '2001:db8:0:2f3b::/64'));
