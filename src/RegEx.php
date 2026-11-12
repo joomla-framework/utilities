@@ -26,7 +26,7 @@ abstract class RegEx
      */
     public static function match($regex, $subject)
     {
-        $match = array();
+        $match = [];
 
         preg_match($regex, $subject, $match);
 
