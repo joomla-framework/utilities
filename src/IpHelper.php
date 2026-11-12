@@ -337,9 +337,20 @@ final class IpHelper
      * @return  void
      *
      * @since   1.6.0
+     * @deprecated  5.0 Overwriting $_SERVER['REMOTE_ADDR'] affects every other component in the process. Pass the
+     *              address from IpHelper::getIp() to the code that needs it instead.
      */
     public static function workaroundIPIssues()
     {
+        trigger_deprecation(
+            'joomla/utilities',
+            '__DEPLOY_VERSION__',
+            '%s() is deprecated and will be removed in 5.0. Pass the address from %s::getIp() to the code that needs it'
+            . ' instead of overwriting REMOTE_ADDR.',
+            __METHOD__,
+            self::class
+        );
+
         $ip = static::getIp();
 
         if (isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR'] === $ip) {
