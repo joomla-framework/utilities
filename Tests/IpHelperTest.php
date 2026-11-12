@@ -235,6 +235,12 @@ class IpHelperTest extends TestCase
     {
         $_SERVER['REMOTE_ADDR'] = '198.51.100.7, 203.0.113.9';
 
+        $this->expectUserDeprecationMessage(
+            'Since joomla/utilities __DEPLOY_VERSION__: Joomla\Utilities\IpHelper::workaroundIPIssues() is deprecated and will be'
+            . ' removed in 5.0. Pass the address from Joomla\Utilities\IpHelper::getIp() to the code that needs it'
+            . ' instead of overwriting REMOTE_ADDR.'
+        );
+
         IpHelper::workaroundIPIssues();
 
         $this->assertSame('198.51.100.7', $_SERVER['REMOTE_ADDR'], 'REMOTE_ADDR is replaced with the cleaned IP');
@@ -249,6 +255,12 @@ class IpHelperTest extends TestCase
     {
         $_SERVER['REMOTE_ADDR'] = '198.51.100.7';
         unset($_SERVER['JOOMLA_REMOTE_ADDR']);
+
+        $this->expectUserDeprecationMessage(
+            'Since joomla/utilities __DEPLOY_VERSION__: Joomla\Utilities\IpHelper::workaroundIPIssues() is deprecated and will be'
+            . ' removed in 5.0. Pass the address from Joomla\Utilities\IpHelper::getIp() to the code that needs it'
+            . ' instead of overwriting REMOTE_ADDR.'
+        );
 
         IpHelper::workaroundIPIssues();
 
