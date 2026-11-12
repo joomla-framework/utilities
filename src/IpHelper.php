@@ -55,7 +55,7 @@ final class IpHelper
         if (self::$ip === null) {
             $ip = static::detectAndCleanIP();
 
-            if (!empty($ip) && ($ip != '0.0.0.0') && \function_exists('inet_pton') && \function_exists('inet_ntop')) {
+            if (!empty($ip) && ($ip != '0.0.0.0')) {
                 $myIP = @inet_pton($ip);
 
                 if ($myIP !== false) {
@@ -132,11 +132,6 @@ final class IpHelper
 
         // If no IP is given, return false
         if (empty($ip)) {
-            return false;
-        }
-
-        // Sanity check
-        if (!\function_exists('inet_pton')) {
             return false;
         }
 
