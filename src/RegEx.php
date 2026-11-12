@@ -24,7 +24,7 @@ abstract class RegEx
      *
      * @return  array  Captured values
      */
-    public static function match($regex, $subject)
+    public static function match(string $regex, string $subject): array
     {
         $match = array();
 
@@ -47,7 +47,7 @@ abstract class RegEx
      *
      * @return  string  The modified Regular Expression
      */
-    public static function capture($regex, $as = null)
+    public static function capture(string $regex, ?string $as = null): string
     {
         return '(?P<' . $as . '>' . $regex . ')';
     }
@@ -59,7 +59,7 @@ abstract class RegEx
      *
      * @return  string  The modified Regular Expression
      */
-    public static function optional($regex)
+    public static function optional(string $regex): string
     {
         return '(?:' . $regex . ')?';
     }
@@ -71,7 +71,7 @@ abstract class RegEx
      *
      * @return  string  The modified Regular Expression
      */
-    public static function oneOrMore($regex)
+    public static function oneOrMore(string $regex): string
     {
         return '(?:' . $regex . ')+';
     }
@@ -83,7 +83,7 @@ abstract class RegEx
      *
      * @return  string  The modified Regular Expression
      */
-    public static function noneOrMore($regex)
+    public static function noneOrMore(string $regex): string
     {
         return '(?:' . $regex . ')*';
     }
@@ -91,14 +91,14 @@ abstract class RegEx
     /**
      * Define a list of alternative expressions.
      *
-     * @param   string|array  $regexList  A list of Regular Expressions to choose from
+     * @param   string|array  ...$regexList  Regular Expressions to choose from, or a single array of them
      *
      * @return  string  The modified Regular Expression
      */
-    public static function anyOf($regexList)
+    public static function anyOf(string|array ...$regexList): string
     {
-        if (is_string($regexList)) {
-            $regexList = func_get_args();
+        if (\is_array($regexList[0] ?? null)) {
+            $regexList = $regexList[0];
         }
 
         return '(?:' . implode('|', $regexList) . ')';

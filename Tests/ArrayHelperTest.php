@@ -117,7 +117,7 @@ class ArrayHelperTest extends TestCase
                     'second' => (object) $common,
                     'third'  => (object) $common,
                 ],
-                null,
+                false,
                 null,
                 [
                     'first'  => (object) $common,
@@ -2322,11 +2322,11 @@ class ArrayHelperTest extends TestCase
     }
 
     /**
-     * @testdox  Verify that getValue() throws an \InvalidArgumentException when an object is given that doesn't implement \ArrayAccess
+     * @testdox  Verify that getValue() throws a \TypeError when an object is given that doesn't implement \ArrayAccess
      */
-    public function testInvalidArgumentExceptionWithAnObjectNotImplementingArrayAccess()
+    public function testTypeErrorWithAnObjectNotImplementingArrayAccess()
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(\TypeError::class);
 
         $object          = new \stdClass();
         $object->name    = "Joe";

@@ -37,7 +37,7 @@ final class ArrayHelper
      *
      * @since   1.0
      */
-    public static function toInteger($array, $default = null)
+    public static function toInteger(mixed $array, mixed $default = null): array
     {
         if (\is_array($array)) {
             return array_map('intval', $array);
@@ -65,7 +65,7 @@ final class ArrayHelper
      *
      * @since   1.0
      */
-    public static function toObject(array $array, $class = 'stdClass', $recursive = true)
+    public static function toObject(array $array, string $class = 'stdClass', bool $recursive = true): object
     {
         $obj = new $class();
 
@@ -92,7 +92,7 @@ final class ArrayHelper
      *
      * @since   1.0
      */
-    public static function toString(array $array, string $innerGlue = '=', string $outerGlue = ' ', $keepOuterKey = false)
+    public static function toString(array $array, string $innerGlue = '=', string $outerGlue = ' ', bool $keepOuterKey = false): string
     {
         $output = [];
 
@@ -123,7 +123,7 @@ final class ArrayHelper
      *
      * @since   1.0
      */
-    public static function fromObject($source, $recurse = true, $regex = null)
+    public static function fromObject(mixed $source, bool $recurse = true, ?string $regex = null): array
     {
         if (\is_object($source) || \is_array($source)) {
             return self::arrayFromObject($source, $recurse, $regex);
@@ -143,7 +143,7 @@ final class ArrayHelper
      *
      * @since   1.0
      */
-    private static function arrayFromObject($item, $recurse, $regex)
+    private static function arrayFromObject(mixed $item, bool $recurse, ?string $regex): mixed
     {
         if (\is_object($item)) {
             $result = [];
@@ -187,7 +187,7 @@ final class ArrayHelper
      * @since   1.5.0
      * @see     https://www.php.net/manual/en/language.types.array.php
      */
-    public static function addColumn(array $array, array $column, $colName, $keyCol = null)
+    public static function addColumn(array $array, array $column, string|int|null $colName, string|int|null $keyCol = null): array
     {
         $result = [];
 
@@ -235,7 +235,7 @@ final class ArrayHelper
      * @since   1.5.0
      * @see     https://www.php.net/manual/en/language.types.array.php
      */
-    public static function dropColumn(array $array, $colName)
+    public static function dropColumn(array $array, string|int $colName): array
     {
         $result = [];
 
@@ -267,7 +267,7 @@ final class ArrayHelper
      * @see     https://www.php.net/manual/en/language.types.array.php
      * @see     https://www.php.net/manual/en/function.array-column.php
      */
-    public static function getColumn(array $array, $valueCol, $keyCol = null)
+    public static function getColumn(array $array, string|int|null $valueCol, string|int|null $keyCol = null): array
     {
         return \array_reduce(
             $array,
@@ -309,12 +309,8 @@ final class ArrayHelper
      * @since   1.0
      * @throws  \InvalidArgumentException
      */
-    public static function getValue($array, $name, $default = null, string $type = '')
+    public static function getValue(array|\ArrayAccess $array, string|int $name, mixed $default = null, string $type = ''): mixed
     {
-        if (!\is_array($array) && !($array instanceof \ArrayAccess)) {
-            throw new \InvalidArgumentException('The object must be an array or an object that implements ArrayAccess');
-        }
-
         $result = null;
 
         if (isset($array[$name])) {
@@ -409,7 +405,7 @@ final class ArrayHelper
      *
      * @since   1.0
      */
-    public static function invert(array $array)
+    public static function invert(array $array): array
     {
         $return = [];
 
@@ -438,7 +434,7 @@ final class ArrayHelper
      *
      * @since   1.0
      */
-    public static function isAssociative($array)
+    public static function isAssociative(mixed $array): bool
     {
         if (\is_array($array)) {
             foreach (array_keys($array) as $k => $v) {
@@ -461,7 +457,7 @@ final class ArrayHelper
      *
      * @since   1.0
      */
-    public static function pivot(array $source, $key = null)
+    public static function pivot(array $source, string|int|null $key = null): array
     {
         $result  = [];
         $counter = [];
@@ -516,18 +512,23 @@ final class ArrayHelper
     /**
      * Utility function to sort an array of objects on a given field
      *
-     * @param   array  $a              An array of objects
-     * @param   mixed  $k              The key (string) or an array of keys to sort on
-     * @param   mixed  $direction      Direction (integer) or an array of direction to sort in [1 = Ascending] [-1 = Descending]
-     * @param   mixed  $caseSensitive  Boolean or array of booleans to let sort occur case sensitive or insensitive
-     * @param   mixed  $locale         Boolean or array of booleans to let sort occur using the locale language or not
+     * @param   array                    $a              An array of objects
+     * @param   string|int|array         $k              The key (string) or an array of keys to sort on
+     * @param   int|array                $direction      Direction (integer) or an array of direction to sort in [1 = Ascending] [-1 = Descending]
+     * @param   bool|array               $caseSensitive  Boolean or array of booleans to let sort occur case sensitive or insensitive
+     * @param   string|array|bool        $locale         Boolean or array of booleans to let sort occur using the locale language or not
      *
      * @return  array
      *
      * @since   1.0
      */
-    public static function sortObjects(array $a, $k, $direction = 1, $caseSensitive = true, $locale = false)
-    {
+    public static function sortObjects(
+        array $a,
+        string|int|array $k,
+        int|array $direction = 1,
+        bool|array $caseSensitive = true,
+        string|array|bool $locale = false
+    ): array {
         if (!\is_array($locale) || !\is_array($locale[0])) {
             $locale = [$locale];
         }
@@ -590,7 +591,7 @@ final class ArrayHelper
      * @see     https://www.php.net/manual/en/function.array-unique.php
      * @since   1.0
      */
-    public static function arrayUnique(array $array)
+    public static function arrayUnique(array $array): array
     {
         $array = array_map('serialize', $array);
         $array = array_unique($array);
@@ -606,11 +607,11 @@ final class ArrayHelper
      * @param   array    $haystack       Associative array to search in to find $needle.
      * @param   boolean  $caseSensitive  True to search case sensitive, false otherwise.
      *
-     * @return  mixed    Returns the matching array $key if found, otherwise false.
+     * @return  string|int|false  Returns the matching array $key if found, otherwise false.
      *
      * @since   1.0
      */
-    public static function arraySearch($needle, array $haystack, $caseSensitive = true)
+    public static function arraySearch(string $needle, array $haystack, bool $caseSensitive = true): string|int|false
     {
         foreach ($haystack as $key => $value) {
             $searchFunc = ($caseSensitive) ? 'strpos' : 'stripos';
@@ -634,7 +635,7 @@ final class ArrayHelper
      *
      * @since   1.3.0
      */
-    public static function flatten($array, $separator = '.', $prefix = '')
+    public static function flatten(array|object $array, string $separator = '.', string $prefix = ''): array
     {
         if ($array instanceof \Traversable) {
             $array = iterator_to_array($array);
