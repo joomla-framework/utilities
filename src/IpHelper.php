@@ -225,7 +225,7 @@ final class IpHelper
                 }
 
                 // Get the network's binary representation
-                $expectedNumberOfBits = $ipv6 ? 128 : 24;
+                $expectedNumberOfBits = $ipv6 ? 128 : 32;
                 $binarynet            = str_pad(static::inetToBits($net), $expectedNumberOfBits, '0', STR_PAD_RIGHT);
 
                 // Check the corresponding bits of the IP and the network
@@ -304,7 +304,7 @@ final class IpHelper
                             }
 
                             // Get the network's binary representation
-                            $expectedNumberOfBits = $ipv6 ? 128 : 24;
+                            $expectedNumberOfBits = $ipv6 ? 128 : 32;
                             $binarynet            = str_pad(static::inetToBits($net), $expectedNumberOfBits, '0', STR_PAD_RIGHT);
 
                             // Check the corresponding bits of the IP and the network
@@ -471,17 +471,11 @@ final class IpHelper
      */
     protected static function inetToBits($inet)
     {
-        if (\strlen($inet) == 4) {
-            $unpacked = unpack('A4', $inet);
-        } else {
-            $unpacked = unpack('A16', $inet);
-        }
-
-        $unpacked = str_split($unpacked[1]);
+        // Unpack every byte: the 'A' format would strip trailing NUL and whitespace bytes
         $binaryip = '';
 
-        foreach ($unpacked as $char) {
-            $binaryip .= str_pad(decbin(\ord($char)), 8, '0', STR_PAD_LEFT);
+        foreach (unpack('C*', $inet) as $byte) {
+            $binaryip .= str_pad(decbin($byte), 8, '0', STR_PAD_LEFT);
         }
 
         return $binaryip;

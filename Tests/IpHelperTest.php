@@ -231,6 +231,44 @@ class IpHelperTest extends TestCase
         $this->assertFalse(IpHelper::IPinList('2001:db8:1:2f3b::1', '2001:db8:0:2f3b::/64'));
     }
 
+    /**
+     * Addresses and networks whose packed form starts or ends with bytes that look like whitespace or NUL
+     * (0x0A is "\n", 0x20 is " ", 0x00 is NUL).
+     */
+    public static function ipInListBitMatchData(): array
+    {
+        return [
+            'CIDR 10/8, network address'      => ['10.0.0.0', '10.0.0.0/8', true],
+            'CIDR 10/8, first host'           => ['10.0.0.1', '10.0.0.0/8', true],
+            'CIDR 10/8, other host'           => ['10.1.2.3', '10.0.0.0/8', true],
+            'CIDR 10/8, last host'            => ['10.255.255.255', '10.0.0.0/8', true],
+            'CIDR 10/8, miss'                 => ['11.0.0.1', '10.0.0.0/8', false],
+            'CIDR 172.16/12, hit'             => ['172.31.255.255', '172.16.0.0/12', true],
+            'CIDR 172.16/12, miss'            => ['172.32.0.0', '172.16.0.0/12', false],
+            'CIDR 192.168/16, network'        => ['192.168.0.0', '192.168.0.0/16', true],
+            'CIDR /32, hit'                   => ['10.0.0.32', '10.0.0.32/32', true],
+            'CIDR /32, miss'                  => ['10.0.0.33', '10.0.0.32/32', false],
+            'CIDR /32, trailing space byte'   => ['32.32.32.32', '32.32.32.32/32', true],
+            'CIDR /0'                         => ['10.0.0.1', '0.0.0.0/0', true],
+            'netmask 10/255.0.0.0, hit'       => ['10.1.2.3', '10.0.0.0/255.0.0.0', true],
+            'netmask 10/255.0.0.0, miss'      => ['11.1.2.3', '10.0.0.0/255.0.0.0', false],
+            'partial 10., hit'                => ['10.0.0.5', '10.', true],
+            'partial 10., miss'               => ['11.0.0.5', '10.', false],
+            'partial 10.0., hit'              => ['10.0.0.5', '10.0.', true],
+            'partial 10.0.0., hit'            => ['10.0.0.5', '10.0.0.', true],
+            'IPv6 CIDR, network address'      => ['2001:db8::', '2001:db8::/32', true],
+            'IPv6 CIDR, /128 trailing zeroes' => ['2001:db8::100:0', '2001:db8::100:0/128', true],
+            'IPv6 CIDR, /128 miss'            => ['2001:db8::100:1', '2001:db8::100:0/128', false],
+            'IPv6 CIDR, leading newline byte' => ['a00::1', 'a00::/8', true],
+        ];
+    }
+
+    #[DataProvider('ipInListBitMatchData')]
+    public function testIPinListComparesAllBitsOfTheAddress(string $ip, string $ipTable, bool $expected)
+    {
+        $this->assertSame($expected, IpHelper::IPinList($ip, $ipTable));
+    }
+
     public function testWorkaroundIPIssuesRewritesRemoteAddr()
     {
         $_SERVER['REMOTE_ADDR'] = '198.51.100.7, 203.0.113.9';
