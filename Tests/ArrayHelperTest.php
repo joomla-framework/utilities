@@ -2519,6 +2519,25 @@ class ArrayHelperTest extends TestCase
         $this->assertEquals(false, ArrayHelper::arraySearch('barfoo', $array));
     }
 
+    /**
+     * @testdox  Verify that arraySearch() skips values that are not scalar and matches scalar values as strings
+     */
+    public function testArraySearchSkipsNonScalarValues()
+    {
+        $array = [
+            'list'   => ['abc'],
+            'object' => new \stdClass(),
+            'null'   => null,
+            'number' => 1234,
+            'name'   => 'abc',
+        ];
+
+        $this->assertSame('number', ArrayHelper::arraySearch('12', $array));
+        $this->assertSame('name', ArrayHelper::arraySearch('a', $array));
+        $this->assertSame('name', ArrayHelper::arraySearch('AB', $array, false));
+        $this->assertFalse(ArrayHelper::arraySearch('x', $array));
+    }
+
     public function testFlatten()
     {
         $array = [
@@ -2599,5 +2618,16 @@ class ArrayHelperTest extends TestCase
         ];
 
         $this->assertEquals($expected, $result);
+    }
+
+    /**
+     * @testdox  Verify that mergeRecursive() names the position of the argument that is not an array
+     */
+    public function testMergeRecursiveReportsTheInvalidArgument()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Argument #2 is not an array.');
+
+        ArrayHelper::mergeRecursive([1], 'x');
     }
 }

@@ -602,6 +602,8 @@ final class ArrayHelper
     /**
      * An improved array_search that allows for partial matching of strings values in associative arrays.
      *
+     * A value matches if it starts with $needle. Values that are not scalar (arrays, objects, null) are skipped.
+     *
      * @param   string   $needle         The text to search for within the array.
      * @param   array    $haystack       Associative array to search in to find $needle.
      * @param   boolean  $caseSensitive  True to search case sensitive, false otherwise.
@@ -613,9 +615,14 @@ final class ArrayHelper
     public static function arraySearch($needle, array $haystack, $caseSensitive = true)
     {
         foreach ($haystack as $key => $value) {
+            // Only scalar values can be searched as strings
+            if (!\is_scalar($value)) {
+                continue;
+            }
+
             $searchFunc = ($caseSensitive) ? 'strpos' : 'stripos';
 
-            if ($searchFunc($value, $needle) === 0) {
+            if ($searchFunc((string) $value, $needle) === 0) {
                 return $key;
             }
         }
@@ -673,7 +680,7 @@ final class ArrayHelper
 
         foreach ($args as $i => $array) {
             if (!\is_array($array)) {
-                throw new \InvalidArgumentException(sprintf('Argument #%d is not an array.', $i + 2));
+                throw new \InvalidArgumentException(sprintf('Argument #%d is not an array.', $i + 1));
             }
 
             foreach ($array as $key => &$value) {

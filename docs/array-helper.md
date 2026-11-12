@@ -383,3 +383,38 @@ $flattenend2 = ArrayHelper::flatten($array, '/');
 
 echo $flattenend2['flower/olive']; // 'peace'
 ```
+
+### arraySearch
+
+Returns the key of the first value that starts with the needle, or `false`. Values that are not
+scalar (arrays, objects, `null`) are skipped; numbers are compared as strings.
+
+```php
+use Joomla\Utilities\ArrayHelper;
+
+$array = array(
+    'name'  => 'Foo',
+    'email' => 'foobar@example.com',
+    'tags'  => array('foo'),
+);
+
+echo ArrayHelper::arraySearch('Foo', $array);           // 'name'
+echo ArrayHelper::arraySearch('FOOBAR', $array, false); // 'email' (case-insensitive)
+```
+
+### mergeRecursive
+
+Merges any number of arrays. Later values win; nested arrays are merged recursively. An argument that
+is not an array throws an `InvalidArgumentException` naming its position (`Argument #2 is not an
+array.`).
+
+```php
+use Joomla\Utilities\ArrayHelper;
+
+$result = ArrayHelper::mergeRecursive(
+    array('fruit' => array('apple' => 'red'), 'animal' => 'cat'),
+    array('fruit' => array('pear' => 'green'), 'animal' => 'dog')
+);
+
+// array('fruit' => array('apple' => 'red', 'pear' => 'green'), 'animal' => 'dog')
+```
