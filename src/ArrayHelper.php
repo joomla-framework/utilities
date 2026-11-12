@@ -520,7 +520,9 @@ final class ArrayHelper
      * @param   mixed  $k              The key (string) or an array of keys to sort on
      * @param   mixed  $direction      Direction (integer) or an array of direction to sort in [1 = Ascending] [-1 = Descending]
      * @param   mixed  $caseSensitive  Boolean or array of booleans to let sort occur case sensitive or insensitive
-     * @param   mixed  $locale         Boolean or array of booleans to let sort occur using the locale language or not
+     * @param   mixed  $locale         Locale for string comparisons, or false to compare byte by byte. A string or a
+     *                                 list of fallback locales (as for setlocale()) applies to all keys. For a locale
+     *                                 per key, pass a list whose first entry is an array, e.g. [['de_DE'], 'en_GB'].
      *
      * @return  array
      *
