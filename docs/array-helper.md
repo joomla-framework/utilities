@@ -294,6 +294,17 @@ $members = array(
 $sorted = ArrayHelper::sortObjects($members, 'last_name', 1);
 var_dump($sorted);
 ```
+
+`sortObjects($a, $k, $direction = 1, $caseSensitive = true, $locale = false)` sorts on one key or on a
+list of keys. `$direction` (`1` ascending, `-1` descending) and `$caseSensitive` take a single value or
+one value per key; a key without its own value uses the previous key's one.
+
+`$locale` selects the locale for string comparisons; `false` compares byte by byte:
+
+* a string, e.g. `'de_DE.UTF-8'`, or a list of fallback locales as `setlocale()` accepts them, e.g.
+  `['de_DE.UTF-8', 'de_DE', 'german']`, applies to all keys;
+* for one locale per key, pass a list whose first entry is an array, e.g.
+  `[['de_DE.UTF-8', 'de_DE'], 'en_GB.UTF-8']`. A flat list of strings is always read as fallbacks.
 Result:
 ```
 array(3) {
