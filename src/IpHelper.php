@@ -199,21 +199,27 @@ final class IpHelper
                     continue;
                 }
 
-                if ($ipv6 && strstr($maskbits, ':')) {
-                    // Perform an IPv6 CIDR check
-                    if (static::checkIPv6CIDR($myIP, $ipExpression)) {
-                        return true;
-                    }
-
-                    // If we didn't match it proceed to the next expression
-                    continue;
-                }
-
                 if (!$ipv6 && strstr($maskbits, '.')) {
                     // Convert IPv4 netmask to CIDR
-                    $long     = ip2long($maskbits);
-                    $base     = ip2long('255.255.255.255');
-                    $maskbits = 32 - log(($long ^ $base) + 1, 2);
+                    $long = ip2long($maskbits);
+
+                    if ($long === false) {
+                        continue;
+                    }
+
+                    // Only a contiguous netmask such as 255.255.240.0 can be expressed as a prefix length
+                    $hostBits = ~$long & 0xFFFFFFFF;
+
+                    if (($hostBits & ($hostBits + 1)) !== 0) {
+                        continue;
+                    }
+
+                    $maskbits = substr_count(decbin($long), '1');
+                } elseif (ctype_digit($maskbits) && (int) $maskbits <= ($ipv6 ? 128 : 32)) {
+                    $maskbits = (int) $maskbits;
+                } else {
+                    // Skip malformed or out-of-range prefix lengths
+                    continue;
                 }
 
                 // Convert network IP to in_addr representation
@@ -485,30 +491,5 @@ final class IpHelper
         }
 
         return $binaryip;
-    }
-
-    /**
-     * Checks if an IPv6 address $ip is part of the IPv6 CIDR block $cidrnet
-     *
-     * @param   string  $ip       The IPv6 address to check, e.g. 21DA:00D3:0000:2F3B:02AC:00FF:FE28:9C5A
-     * @param   string  $cidrnet  The IPv6 CIDR block, e.g. 21DA:00D3:0000:2F3B::/64
-     *
-     * @return  boolean
-     *
-     * @since   1.6.0
-     */
-    protected static function checkIPv6CIDR($ip, $cidrnet)
-    {
-        $ip       = inet_pton($ip);
-        $binaryip = static::inetToBits($ip);
-
-        list($net, $maskbits) = explode('/', $cidrnet);
-        $net                  = inet_pton($net);
-        $binarynet            = static::inetToBits($net);
-
-        $ipNetBits = substr($binaryip, 0, $maskbits);
-        $netBits   = substr($binarynet, 0, $maskbits);
-
-        return $ipNetBits === $netBits;
     }
 }
