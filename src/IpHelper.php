@@ -255,7 +255,8 @@ final class IpHelper
                     }
                 } else {
                     // Standard IPv4 address, i.e. 123.123.123.123 or partial IP address, i.e. 123.[123.][123.][123]
-                    $dots = 0;
+                    $dots    = 0;
+                    $netmask = '';
 
                     if (substr($ipExpression, -1) == '.') {
                         // Partial IP address. Convert to CIDR and re-match
