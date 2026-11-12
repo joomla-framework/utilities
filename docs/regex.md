@@ -119,12 +119,14 @@ Array
 
 As you can see from the example above, `RegEx::match()` returns the matches that have been
 appropriately marked using `RegEx::capture()`.
-Only the matches that have a value are returned.
+Only the matches that have a value are returned: named groups that matched an empty string, or did not
+take part in the match, are left out. A group that matched `'0'` is returned.
 If the Regular Expression does not match, the result is an empty array.
 
 ### capture
 
-Assign a key to an expression.
+Assign a key to an expression. Without a key, `capture()` creates an unnamed capturing group, which
+`RegEx::match()` does not return.
 
 ```php
 use Joomla\Utilities\RegEx;

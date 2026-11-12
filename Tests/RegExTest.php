@@ -195,4 +195,29 @@ class RegExTest extends TestCase
 			)
 		);
 	}
+
+	public function testMatchKeepsCapturesThatAreZero()
+	{
+		self::assertSame(
+			['number' => '0'],
+			RegEx::match('/' . RegEx::capture('\d+', 'number') . '/', 'abc 0')
+		);
+	}
+
+	public function testMatchDropsEmptyCaptures()
+	{
+		self::assertSame(
+			['word' => 'abc'],
+			RegEx::match('/' . RegEx::capture('[a-z]+', 'word') . RegEx::capture('\d*', 'number') . '/', 'abc')
+		);
+	}
+
+	public function testCaptureWithoutANameCreatesAnUnnamedGroup()
+	{
+		$regex = RegEx::capture('\d+');
+
+		self::assertSame('(\d+)', $regex);
+		self::assertSame(1, preg_match('/' . $regex . '/', 'abc 1', $matches));
+		self::assertSame('1', $matches[1]);
+	}
 }

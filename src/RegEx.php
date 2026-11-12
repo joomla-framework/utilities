@@ -33,7 +33,7 @@ abstract class RegEx
         return array_filter(
             $match,
             static function ($value, $key) {
-                return !is_numeric($key) && !empty($value);
+                return !is_numeric($key) && $value !== '';
             },
             ARRAY_FILTER_USE_BOTH
         );
@@ -42,13 +42,19 @@ abstract class RegEx
     /**
      * Assign a key to an expression.
      *
-     * @param   string  $regex  The Regular Expression to match
-     * @param   string  $as     The name of the component, used as index
+     * Without a name, the expression becomes an unnamed capturing group, which match() does not return.
+     *
+     * @param   string       $regex  The Regular Expression to match
+     * @param   string|null  $as     The name of the component, used as index
      *
      * @return  string  The modified Regular Expression
      */
     public static function capture($regex, $as = null)
     {
+        if ($as === null || $as === '') {
+            return '(' . $regex . ')';
+        }
+
         return '(?P<' . $as . '>' . $regex . ')';
     }
 
