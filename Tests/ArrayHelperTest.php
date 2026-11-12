@@ -7,6 +7,7 @@
 namespace Joomla\Utilities\Tests;
 
 use Joomla\Utilities\ArrayHelper;
+use Joomla\Utilities\Tests\Stubs\WakeupTracker;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
@@ -2213,6 +2214,22 @@ class ArrayHelperTest extends TestCase
             $expected,
             ArrayHelper::arrayUnique($input)
         );
+    }
+
+    /**
+     * @testdox  Verify that arrayUnique() returns the original values instead of unserialized copies
+     */
+    public function testArrayUniqueKeepsTheOriginalValues()
+    {
+        $first  = new WakeupTracker('a');
+        $second = new WakeupTracker('b');
+
+        $result = ArrayHelper::arrayUnique(['x' => $first, 'y' => clone $first, 'z' => $second]);
+
+        $this->assertSame(['x', 'z'], array_keys($result));
+        $this->assertSame($first, $result['x'], 'The first occurrence must be returned, not a copy of it');
+        $this->assertSame($second, $result['z']);
+        $this->assertSame(0, WakeupTracker::$wakeups, 'No value may be unserialized');
     }
 
     /**
