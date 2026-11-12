@@ -150,6 +150,48 @@ class IpHelperTest extends TestCase
         $this->assertSame($expected, IpHelper::isIPv6($ip));
     }
 
+    public static function ipInListMaskData(): array
+    {
+        return [
+            'non-numeric prefix length'      => ['198.51.100.7', '198.51.100.0/abc', false],
+            'empty prefix length'            => ['198.51.100.7', '198.51.100.0/', false],
+            'negative prefix length'         => ['198.51.100.5', '198.51.100.4/-1', false],
+            'fractional prefix length'       => ['198.51.100.7', '198.51.100.0/24.5', false],
+            'IPv4 prefix length above 32'    => ['198.51.100.7', '198.51.100.0/33', false],
+            'IPv6 prefix length above 128'   => ['2001:db8::1', '2001:db8::/129', false],
+            'non-contiguous netmask'         => ['198.51.100.7', '198.51.100.0/255.0.255.0', false],
+            'invalid netmask'                => ['198.51.100.7', '198.51.100.0/255.255.255.', false],
+            'IPv6 netmask notation'          => ['2001:db8::1', '2001:db8::/ffff:ffff::', false],
+            'contiguous netmask /20'         => ['198.51.100.7', '198.51.96.0/255.255.240.0', true],
+            'netmask /0'                     => ['198.51.100.7', '0.0.0.0/0.0.0.0', true],
+            'netmask /32'                    => ['198.51.100.7', '198.51.100.7/255.255.255.255', true],
+            'IPv6 /128'                      => ['2001:db8::1', '2001:db8::1/128', true],
+            'valid entry after a broken one' => ['198.51.100.7', ['198.51.100.0/abc', '198.51.100.0/24'], true],
+        ];
+    }
+
+    #[DataProvider('ipInListMaskData')]
+    public function testIPinListSkipsMalformedMasks(string $ip, $ipTable, bool $expected)
+    {
+        $errors = [];
+
+        set_error_handler(
+            static function (int $errno, string $errstr) use (&$errors) {
+                $errors[] = $errstr;
+
+                return true;
+            }
+        );
+
+        try {
+            $this->assertSame($expected, IpHelper::IPinList($ip, $ipTable));
+        } finally {
+            restore_error_handler();
+        }
+
+        $this->assertSame([], $errors, 'A malformed mask must not raise PHP errors or deprecations');
+    }
+
     public static function ipInListData(): array
     {
         return [
