@@ -26,7 +26,7 @@ final class IpHelper
     private static $ip = null;
 
     /**
-     * Should I allow IP overrides through X-Forwarded-For or Client-Ip HTTP headers?
+     * Should I allow IP overrides through the X-Forwarded-For HTTP header?
      *
      * @var    boolean
      * @since  1.6.0
@@ -332,33 +332,7 @@ final class IpHelper
     }
 
     /**
-     * Works around the REMOTE_ADDR not containing the user's IP
-     *
-     * @return  void
-     *
-     * @since   1.6.0
-     */
-    public static function workaroundIPIssues()
-    {
-        $ip = static::getIp();
-
-        if (isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR'] === $ip) {
-            return;
-        }
-
-        if (isset($_SERVER['REMOTE_ADDR'])) {
-            $_SERVER['JOOMLA_REMOTE_ADDR'] = $_SERVER['REMOTE_ADDR'];
-        } elseif (\function_exists('getenv')) {
-            if (getenv('REMOTE_ADDR')) {
-                $_SERVER['JOOMLA_REMOTE_ADDR'] = getenv('REMOTE_ADDR');
-            }
-        }
-
-        $_SERVER['REMOTE_ADDR'] = $ip;
-    }
-
-    /**
-     * Should I allow the remote client's IP to be overridden by an X-Forwarded-For or Client-Ip HTTP header?
+     * Should I allow the remote client's IP to be overridden by an X-Forwarded-For HTTP header?
      *
      * @param   boolean  $newState  True to allow the override
      *
@@ -422,11 +396,6 @@ final class IpHelper
                 return $_SERVER['HTTP_X_FORWARDED_FOR'];
             }
 
-            // Do we have a client-ip header (e.g. non-transparent proxy)?
-            if (self::$allowIpOverrides && isset($_SERVER['HTTP_CLIENT_IP'])) {
-                return $_SERVER['HTTP_CLIENT_IP'];
-            }
-
             // Normal, non-proxied server or server behind a transparent proxy
             if (isset($_SERVER['REMOTE_ADDR'])) {
                 return $_SERVER['REMOTE_ADDR'];
@@ -444,11 +413,6 @@ final class IpHelper
         // Do we have an x-forwarded-for HTTP header?
         if (self::$allowIpOverrides && getenv('HTTP_X_FORWARDED_FOR')) {
             return getenv('HTTP_X_FORWARDED_FOR');
-        }
-
-        // Do we have a client-ip header?
-        if (self::$allowIpOverrides && getenv('HTTP_CLIENT_IP')) {
-            return getenv('HTTP_CLIENT_IP');
         }
 
         // Normal, non-proxied server or server behind a transparent proxy
