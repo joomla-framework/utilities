@@ -185,6 +185,19 @@ echo ArrayHelper::getValue($city, 'name');
 echo ArrayHelper::getValue($city, 'mayor', 'unknown mayor');
 ```
 
+A dot-separated name such as `'address.city'` walks into nested arrays and into nested objects that
+implement `ArrayAccess`.
+
+The optional fourth argument casts the result: `INT`/`INTEGER` and `FLOAT`/`DOUBLE` take the first
+number found in the value, `WORD` keeps only word characters, and `BOOL`/`BOOLEAN`, `STRING` and
+`ARRAY` cast the value. If the value is not a scalar (an array or an object), `INT` gives `0`, `FLOAT`
+gives `0.0` and `WORD` gives `''`.
+
+```php
+// Prints 0
+echo ArrayHelper::getValue(['ids' => [1, 2]], 'ids', null, 'INT');
+```
+
 ### invert
 
 ```php

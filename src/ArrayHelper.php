@@ -322,7 +322,7 @@ final class ArrayHelper
         } elseif (strpos($name, '.')) {
             list($name, $subset) = explode('.', $name, 2);
 
-            if (isset($array[$name]) && \is_array($array[$name])) {
+            if (isset($array[$name]) && (\is_array($array[$name]) || $array[$name] instanceof \ArrayAccess)) {
                 return static::getValue($array[$name], $subset, $default, $type);
             }
         }
@@ -336,17 +336,23 @@ final class ArrayHelper
         switch (strtoupper($type)) {
             case 'INT':
             case 'INTEGER':
-                // Only use the first integer value
-                @preg_match('/-?[0-9]+/', $result, $matches);
-                $result = @(int) $matches[0];
+                // Only use the first integer value; values that are not scalar have none
+                if (\is_scalar($result) && preg_match('/-?[0-9]+/', (string) $result, $matches)) {
+                    $result = (int) $matches[0];
+                } else {
+                    $result = 0;
+                }
 
                 break;
 
             case 'FLOAT':
             case 'DOUBLE':
-                // Only use the first floating point value
-                @preg_match('/-?[0-9]+(\.[0-9]+)?/', $result, $matches);
-                $result = @(float) $matches[0];
+                // Only use the first floating point value; values that are not scalar have none
+                if (\is_scalar($result) && preg_match('/-?[0-9]+(\.[0-9]+)?/', (string) $result, $matches)) {
+                    $result = (float) $matches[0];
+                } else {
+                    $result = 0.0;
+                }
 
                 break;
 
@@ -369,7 +375,7 @@ final class ArrayHelper
                 break;
 
             case 'WORD':
-                $result = (string) preg_replace('#\W#', '', $result);
+                $result = \is_scalar($result) ? (string) preg_replace('#\W#', '', (string) $result) : '';
 
                 break;
 

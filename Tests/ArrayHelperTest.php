@@ -2338,6 +2338,65 @@ class ArrayHelperTest extends TestCase
     }
 
     /**
+     * Data provider for testGetValueCastsNonScalarValues.
+     *
+     * @return  array
+     */
+    public static function seedTestGetValueNonScalar(): array
+    {
+        return [
+            'array as INT'    => [['a' => [1, 2]], 'INT', 0],
+            'array as FLOAT'  => [['a' => [1.5, 2]], 'FLOAT', 0.0],
+            'array as WORD'   => [['a' => ['abc']], 'WORD', ''],
+            'object as INT'   => [['a' => new \stdClass()], 'INT', 0],
+            'object as FLOAT' => [['a' => new \stdClass()], 'FLOAT', 0.0],
+            'object as WORD'  => [['a' => new \stdClass()], 'WORD', ''],
+            'null as INT'     => [['b' => 1], 'INT', 0],
+            'null as WORD'    => [['b' => 1], 'WORD', ''],
+        ];
+    }
+
+    /**
+     * @testdox  Verify that getValue() casts non-scalar values to an empty value of the type without raising errors
+     *
+     * @param   array   $input   Input array, the value is read from key 'a'
+     * @param   string  $type    The type of value returned
+     * @param   mixed   $expect  The expected result
+     */
+    #[DataProvider('seedTestGetValueNonScalar')]
+    public function testGetValueCastsNonScalarValues($input, $type, $expect)
+    {
+        $errors = [];
+
+        set_error_handler(
+            static function (int $errno, string $errstr) use (&$errors) {
+                $errors[] = $errstr;
+
+                return true;
+            }
+        );
+
+        try {
+            $this->assertSame($expect, ArrayHelper::getValue($input, 'a', null, $type));
+        } finally {
+            restore_error_handler();
+        }
+
+        $this->assertSame([], $errors, 'Casting a non-scalar value must not raise PHP errors');
+    }
+
+    /**
+     * @testdox  Verify that getValue() follows a dot-separated path through objects implementing ArrayAccess
+     */
+    public function testGetValueFollowsNestedArrayAccess()
+    {
+        $input = ['a' => new \ArrayObject(['b' => ['c' => 'value']])];
+
+        $this->assertSame('value', ArrayHelper::getValue($input, 'a.b.c'));
+        $this->assertSame('default', ArrayHelper::getValue($input, 'a.x', 'default'));
+    }
+
+    /**
      * Tests the ArrayHelper::invert method.
      *
      * @param   array   $input     The array being input.
