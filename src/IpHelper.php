@@ -23,7 +23,7 @@ final class IpHelper
      * @var    string
      * @since  1.6.0
      */
-    private static $ip = null;
+    private static ?string $ip = null;
 
     /**
      * Should I allow IP overrides through X-Forwarded-For or Client-Ip HTTP headers?
@@ -32,7 +32,7 @@ final class IpHelper
      * @since  1.6.0
      * @note   The default value is false in version 2.0+
      */
-    private static $allowIpOverrides = false;
+    private static bool $allowIpOverrides = false;
 
     /**
      * Private constructor to prevent instantiation of this class
@@ -50,7 +50,7 @@ final class IpHelper
      *
      * @since   1.6.0
      */
-    public static function getIp()
+    public static function getIp(): string
     {
         if (self::$ip === null) {
             $ip = static::detectAndCleanIP();
@@ -78,7 +78,7 @@ final class IpHelper
      *
      * @since   1.6.0
      */
-    public static function setIp($ip)
+    public static function setIp(?string $ip): void
     {
         self::$ip = $ip;
     }
@@ -92,7 +92,7 @@ final class IpHelper
      *
      * @since   1.6.0
      */
-    public static function isIPv6($ip)
+    public static function isIPv6(string $ip): bool
     {
         return strpos($ip, ':') !== false;
     }
@@ -107,7 +107,7 @@ final class IpHelper
      *
      * @since   1.6.0
      */
-    public static function IPinList($ip, $ipTable = '')
+    public static function IPinList(string $ip, array|string $ipTable = ''): bool
     {
         // No point proceeding with an empty IP list
         if (empty($ipTable)) {
@@ -366,7 +366,7 @@ final class IpHelper
      *
      * @since   1.6.0
      */
-    public static function setAllowIpOverrides($newState)
+    public static function setAllowIpOverrides(bool $newState): void
     {
         self::$allowIpOverrides = $newState ? true : false;
     }
@@ -385,7 +385,7 @@ final class IpHelper
      *
      * @since   1.6.0
      */
-    protected static function detectAndCleanIP()
+    protected static function detectAndCleanIP(): string
     {
         $ip = static::detectIP();
 
@@ -413,7 +413,7 @@ final class IpHelper
      *
      * @since   1.6.0
      */
-    protected static function detectIP()
+    protected static function detectIP(): string
     {
         // Normally the $_SERVER superglobal is set
         if (isset($_SERVER)) {
@@ -469,7 +469,7 @@ final class IpHelper
      *
      * @since   1.6.0
      */
-    protected static function inetToBits($inet)
+    protected static function inetToBits(string $inet): string
     {
         if (\strlen($inet) == 4) {
             $unpacked = unpack('A4', $inet);
@@ -497,7 +497,7 @@ final class IpHelper
      *
      * @since   1.6.0
      */
-    protected static function checkIPv6CIDR($ip, $cidrnet)
+    protected static function checkIPv6CIDR(string $ip, string $cidrnet): bool
     {
         $ip       = inet_pton($ip);
         $binaryip = static::inetToBits($ip);
